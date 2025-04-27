@@ -1,406 +1,368 @@
-import { useState } from 'react';
-import { Search, Book, Users, Award, ChevronRight, Compass, ArrowRight, Star, Play } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, BookOpen, Code, Camera, TrendingUp, Star, ArrowRight, Users } from 'lucide-react';
 
-export default function SkillSharingPlatform() {
-  const [activeCategory, setActiveCategory] = useState('All');
+// Custom icon for ChefHat since it might be causing issues
+const ChefHat = ({ size = 24, className = "" }) => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    width={size} 
+    height={size} 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    className={className}
+  >
+    <path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z"></path>
+    <line x1="6" x2="18" y1="17" y2="17"></line>
+  </svg>
+);
+
+// Custom icon for Tool to replace the unsupported lucide-react import
+const Tool = ({ size = 24, className = "" }) => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    width={size} 
+    height={size} 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    className={className}
+  >
+    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+  </svg>
+);
+
+export default function Home() {
+  const [isVisible, setIsVisible] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('all');
   
-  const categories = ['All', 'Design', 'Development', 'Business', 'Marketing', 'Photography', 'Music'];
-  
-  const featuredCourses = [
-    {
-      id: 1,
-      title: "UX/UI Design Fundamentals",
-      instructor: "Alex Morgan",
-      image: "/api/placeholder/400/250",
-      rating: 4.9,
-      students: 2340,
-      category: "Design"
-    },
-    {
-      id: 2,
-      title: "Full-Stack Web Development",
-      instructor: "Jamie Rivera",
-      image: "/api/placeholder/400/250",
-      rating: 4.8,
-      students: 1890,
-      category: "Development"
-    },
-    {
-      id: 3,
-      title: "Digital Marketing Strategy",
-      instructor: "Samira Khan",
-      image: "/api/placeholder/400/250",
-      rating: 4.7,
-      students: 1540,
-      category: "Marketing"
-    }
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
+
+  const categories = [
+    { id: 'coding', name: 'Coding', icon: <Code size={20} />, color: 'bg-blue-500' },
+    { id: 'cooking', name: 'Cooking', icon: <ChefHat size={20} />, color: 'bg-red-500' },
+    { id: 'photography', name: 'Photography', icon: <Camera size={20} />, color: 'bg-purple-500' },
+    { id: 'diy', name: 'DIY Crafts', icon: <Tool size={20} />, color: 'bg-green-500' }
   ];
-  
+
+  const trendingSkills = [
+    { id: 1, title: 'React Fundamentals', category: 'coding', instructor: 'Alex Johnson', students: 2483, rating: 4.9, image: '/api/placeholder/300/200' },
+    { id: 2, title: 'Italian Cuisine Mastery', category: 'cooking', instructor: 'Maria Romano', students: 1872, rating: 4.8, image: '/api/placeholder/300/200' },
+    { id: 3, title: 'Portrait Photography', category: 'photography', instructor: 'Sam Wilson', students: 1456, rating: 4.7, image: '/api/placeholder/300/200' },
+    { id: 4, title: 'DIY Home Decor', category: 'diy', instructor: 'Emma Davis', students: 1293, rating: 4.6, image: '/api/placeholder/300/200' }
+  ];
+
+  const testimonials = [
+    { id: 1, text: "This platform completely transformed my coding skills. The interactive lessons and supportive community made learning enjoyable!", author: "Chris T.", role: "Software Developer" },
+    { id: 2, text: "I started my photography journey here and now I'm working professionally. The expert guidance was invaluable.", author: "Michelle K.", role: "Photographer" }
+  ];
+
+  const filteredSkills = selectedCategory === 'all' 
+    ? trendingSkills 
+    : trendingSkills.filter(skill => skill.category === selectedCategory);
+
+  // Helper function to get appropriate border color class based on category
+  const getBorderColorClass = (categoryId) => {
+    const category = categories.find(cat => cat.id === categoryId);
+    if (category) {
+      if (category.color === 'bg-blue-500') return 'border-blue-400';
+      if (category.color === 'bg-red-500') return 'border-red-400';
+      if (category.color === 'bg-purple-500') return 'border-purple-400';
+      if (category.color === 'bg-green-500') return 'border-green-400';
+    }
+    return 'border-gray-700';
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
-      {/* Navigation */}
-      <nav className="bg-white shadow-sm">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="bg-indigo-600 text-white p-2 rounded-lg">
-              <Compass size={24} />
-            </div>
-            <span className="text-xl font-bold text-gray-800">SkillForge</span>
-          </div>
-          
-          <div className="hidden md:flex items-center space-x-8">
-            <a href="#" className="text-gray-700 hover:text-indigo-600 font-medium">Explore</a>
-            <a href="#" className="text-gray-700 hover:text-indigo-600 font-medium">Teach</a>
-            <a href="#" className="text-gray-700 hover:text-indigo-600 font-medium">Community</a>
-            <a href="#" className="text-gray-700 hover:text-indigo-600 font-medium">About</a>
-          </div>
-          
-          <div className="flex items-center space-x-4">
-            <button className="hidden md:block bg-white hover:bg-gray-50 text-indigo-600 font-semibold py-2 px-4 border border-indigo-600 rounded-lg">
-              Log In
-            </button>
-            <button className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg">
-              Sign Up Free
-            </button>
-          </div>
+    <div className="min-h-screen bg-gray-900 text-gray-100">
+      {/* Hero Section - Modernized with full background image */}
+      <header className={`relative min-h-screen flex items-center transition-all duration-1000 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+        {/* Background image with overlay */}
+        <div className="absolute inset-0 z-0">
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-900/90 to-gray-800/70 z-10"></div>
+          <img 
+            src="../assets/images/banner.jpg" 
+            alt="Background" 
+            className="w-full h-full object-cover object-center"
+          />
         </div>
-      </nav>
-      
-      {/* Hero Section */}
-      <section className="container mx-auto px-4 py-16 md:py-24">
-        <div className="flex flex-col md:flex-row items-center">
-          <div className="md:w-1/2 mb-10 md:mb-0">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-6">
-              Share Knowledge.<br />
-              <span className="text-indigo-600">Grow Together.</span>
-            </h1>
-            <p className="text-lg text-gray-600 mb-8">
-              Join our vibrant community where passionate individuals teach and learn valuable skills. Discover courses, connect with experts, and unlock your potential.
-            </p>
-            <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 mb-8">
-              <div className="relative">
-                <Search className="absolute left-3 top-3 text-gray-400" size={20} />
-                <input 
-                  type="text" 
-                  placeholder="What do you want to learn?" 
-                  className="pl-10 pr-4 py-3 w-full sm:w-64 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                />
+        
+        {/* Animated particles/gradient effect */}
+        <div className="absolute inset-0 bg-gradient-radial from-blue-900/20 via-transparent to-transparent z-20"></div>
+        
+        <div className="container mx-auto px-6 py-20 relative z-30">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <div className="space-y-8">
+              <div className="inline-block px-4 py-2 bg-blue-500/20 backdrop-blur-sm rounded-full mb-4">
+                <p className="text-blue-300 text-sm font-medium flex items-center">
+                  <TrendingUp size={16} className="mr-2" />
+                  Learn from the best experts worldwide
+                </p>
               </div>
-              <button className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg flex items-center justify-center">
-                <span>Find Courses</span>
-                <ChevronRight size={18} className="ml-1" />
-              </button>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="flex -space-x-2">
-                <img src="/api/placeholder/32/32" alt="User" className="w-8 h-8 rounded-full border-2 border-white" />
-                <img src="/api/placeholder/32/32" alt="User" className="w-8 h-8 rounded-full border-2 border-white" />
-                <img src="/api/placeholder/32/32" alt="User" className="w-8 h-8 rounded-full border-2 border-white" />
-              </div>
-              <p className="text-sm text-gray-600">
-                <span className="font-semibold text-gray-900">10,000+</span> people joined last month
+              
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
+                <span className="block mb-2">Learn Any Skill.</span>
+                <span className="block mb-2">Share Your Knowledge.</span>
+                <span className="block bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">Grow Together.</span>
+              </h1>
+              
+              <p className="text-xl text-gray-300 max-w-lg">
+                Join our community of passionate learners and experts sharing skills across coding, cooking, photography, DIY crafts, and more.
               </p>
-            </div>
-          </div>
-          <div className="md:w-1/2 relative">
-            <div className="bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl p-4">
-              <img src="/api/placeholder/600/400" alt="Learning Platform" className="rounded-lg shadow-lg" />
-            </div>
-            <div className="absolute -bottom-5 -left-5 bg-white p-4 rounded-lg shadow-lg">
-              <div className="flex items-center space-x-2">
-                <div className="bg-green-100 p-2 rounded-full">
-                  <Users size={20} className="text-green-600" />
+              
+              <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                <div className="relative flex-grow max-w-md">
+                  <Search className="absolute left-4 top-3.5 text-gray-400" size={20} />
+                  <input 
+                    type="text" 
+                    placeholder="What do you want to learn today?"
+                    className="w-full py-3.5 pl-12 pr-4 rounded-full bg-gray-800/80 backdrop-blur-sm border border-gray-700 focus:border-blue-400 focus:ring-2 focus:ring-blue-400 focus:outline-none text-base shadow-lg"
+                  />
                 </div>
-                <div>
-                  <p className="text-xs text-gray-500">Active learners</p>
-                  <p className="font-bold text-gray-800">45.7k+</p>
+                <button className="py-3.5 px-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full hover:from-blue-600 hover:to-purple-700 transition-all flex items-center justify-center font-medium shadow-lg shadow-blue-500/20">
+                  Start Learning <ArrowRight size={18} className="ml-2" />
+                </button>
+              </div>
+              
+              <div className="flex items-center pt-4">
+                <div className="flex -space-x-4">
+                  {[1, 2, 3, 4].map(i => (
+                    <div key={i} className="w-10 h-10 rounded-full bg-gray-600 border-2 border-gray-800" />
+                  ))}
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm">Join <span className="text-blue-400 font-bold">2M+</span> active learners</p>
                 </div>
               </div>
-            </div>
-            <div className="absolute -top-5 -right-5 bg-white p-4 rounded-lg shadow-lg">
-              <div className="flex items-center space-x-2">
-                <div className="bg-blue-100 p-2 rounded-full">
-                  <Book size={20} className="text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">Total courses</p>
-                  <p className="font-bold text-gray-800">1,200+</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-      
-      {/* Features Section */}
-      <section className="bg-white py-16">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">Why Choose SkillForge?</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-gradient-to-br from-indigo-50 to-blue-50 p-6 rounded-xl">
-              <div className="bg-indigo-100 inline-block p-3 rounded-lg mb-4">
-                <Book size={24} className="text-indigo-600" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Learn Real Skills</h3>
-              <p className="text-gray-600">
-                Access high-quality courses created by real experts and practitioners in various fields.
-              </p>
             </div>
             
-            <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-6 rounded-xl">
-              <div className="bg-purple-100 inline-block p-3 rounded-lg mb-4">
-                <Users size={24} className="text-purple-600" />
+            <div className="relative hidden lg:block">
+              {/* 3D-style card display */}
+              <div className={`bg-gray-800/80 backdrop-blur-lg rounded-2xl overflow-hidden shadow-2xl transform transition-all duration-1000 ${isVisible ? 'translate-y-0 rotate-1' : 'translate-y-20 rotate-0'}`}>
+                <img src="/api/placeholder/600/400" alt="Learning Platform Preview" className="w-full h-auto" />
+                <div className="p-6">
+                  <h3 className="text-xl font-semibold mb-2">React Fundamentals</h3>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-400 flex items-center">
+                      <Users size={14} className="mr-1" />
+                      2,483 students
+                    </span>
+                    <div className="flex items-center">
+                      <Star size={14} className="text-yellow-400" fill="#FACC15" />
+                      <span className="ml-1 text-sm">4.9</span>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Vibrant Community</h3>
-              <p className="text-gray-600">
-                Connect with like-minded individuals, participate in discussions, and collaborate on projects.
-              </p>
+              
+              {/* Floating cards */}
+              <div className="absolute -bottom-8 -right-8 bg-gradient-to-br from-blue-500 to-purple-600 p-1 rounded-lg transform rotate-3 shadow-xl">
+                <div className="bg-gray-800/90 backdrop-blur-sm p-4 rounded">
+                  <div className="flex items-center space-x-2">
+                    <TrendingUp size={18} className="text-green-400" />
+                    <span className="text-sm font-medium">Skills in demand</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="absolute -top-8 -left-8 bg-gradient-to-br from-purple-500 to-pink-600 p-1 rounded-lg transform -rotate-6 shadow-xl">
+                <div className="bg-gray-800/90 backdrop-blur-sm p-4 rounded">
+                  <div className="flex items-center space-x-2">
+                    <Users size={18} className="text-blue-400" />
+                    <span className="text-sm font-medium">Expert instructors</span>
+                  </div>
+                </div>
+              </div>
             </div>
-            
-            <div className="bg-gradient-to-br from-green-50 to-teal-50 p-6 rounded-xl">
-              <div className="bg-green-100 inline-block p-3 rounded-lg mb-4">
-                <Award size={24} className="text-green-600" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Earn While Learning</h3>
-              <p className="text-gray-600">
-                Share your expertise, teach courses, and earn income while helping others grow.
-              </p>
+          </div>
+          
+          {/* Scroll indicator */}
+          <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 flex flex-col items-center opacity-75 hover:opacity-100 transition-opacity">
+            <p className="text-sm text-gray-400 mb-2">Scroll to explore</p>
+            <div className="w-6 h-10 border-2 border-gray-400 rounded-full flex justify-center">
+              <div className="w-1.5 h-3 bg-gray-400 rounded-full mt-2 animate-bounce"></div>
             </div>
           </div>
         </div>
-      </section>
-      
-      {/* Featured Courses */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="flex flex-col md:flex-row items-center justify-between mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4 md:mb-0">Featured Courses</h2>
-          <div className="flex flex-wrap gap-2">
-            {categories.map(category => (
-              <button 
-                key={category}
-                onClick={() => setActiveCategory(category)}
-                className={`px-4 py-2 rounded-full text-sm font-medium ${
-                  activeCategory === category 
-                    ? 'bg-indigo-600 text-white' 
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
+      </header>
+
+      {/* Categories Section */}
+      <section className="py-20 bg-gray-900">
+        <div className="container mx-auto px-6">
+          <div className="flex flex-col md:flex-row justify-between items-center mb-12">
+            <h2 className="text-3xl font-bold">Explore Categories</h2>
+            <p className="text-gray-400 max-w-md mt-4 md:mt-0">Discover a wide range of skills taught by industry experts</p>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+            {categories.map((category, index) => (
+              <div 
+                key={category.id}
+                className="group p-6 rounded-xl bg-gray-800/60 backdrop-blur-sm border border-gray-700 hover:border-blue-400 transition-all duration-300 transform hover:-translate-y-2 cursor-pointer"
+                style={{animationDelay: `${index * 150}ms`}}
               >
-                {category}
-              </button>
+                <div className={`${category.color} w-14 h-14 rounded-full flex items-center justify-center mb-5 group-hover:scale-110 transition-transform`}>
+                  {category.icon}
+                </div>
+                <h3 className="text-xl font-semibold mb-3">{category.name}</h3>
+                <p className="text-gray-400 text-sm">Master {category.name.toLowerCase()} skills with our expert-led courses</p>
+              </div>
             ))}
           </div>
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {featuredCourses.map(course => (
-            <div key={course.id} className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-              <div className="relative">
-                <img src={course.image} alt={course.title} className="w-full h-48 object-cover" />
-                <div className="absolute top-4 right-4 bg-white bg-opacity-90 px-2 py-1 rounded text-xs font-semibold text-indigo-600">
-                  {course.category}
-                </div>
-                <button className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 hover:bg-opacity-20 transition-opacity">
-                  <div className="bg-indigo-600 text-white p-3 rounded-full opacity-0 hover:opacity-100 transform scale-95 hover:scale-100 transition-all">
-                    <Play size={20} />
-                  </div>
+      </section>
+
+      {/* Trending Skills Section */}
+      <section className="py-20 bg-gray-800">
+        <div className="container mx-auto px-6">
+          <div className="flex flex-col md:flex-row justify-between items-center mb-12">
+            <h2 className="text-3xl font-bold">Trending Skills</h2>
+            
+            <div className="flex mt-6 md:mt-0 space-x-2 overflow-x-auto pb-2">
+              <button 
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${selectedCategory === 'all' ? 'bg-blue-500 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
+                onClick={() => setSelectedCategory('all')}
+              >
+                All
+              </button>
+              {categories.map(category => (
+                <button 
+                  key={category.id}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${selectedCategory === category.id ? 'bg-blue-500 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
+                  onClick={() => setSelectedCategory(category.id)}
+                >
+                  {category.name}
                 </button>
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">{course.title}</h3>
-                <p className="text-gray-600 mb-4">by {course.instructor}</p>
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center">
-                    <Star size={16} className="text-yellow-500 fill-current" />
-                    <span className="ml-1 text-gray-700 font-medium">{course.rating}</span>
+              ))}
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {filteredSkills.map((skill, index) => (
+              <div 
+                key={skill.id} 
+                className={`bg-gray-900/80 backdrop-blur-sm rounded-xl overflow-hidden border ${getBorderColorClass(skill.category)} transition-all duration-300 transform hover:-translate-y-2 hover:shadow-lg hover:shadow-${skill.category === 'coding' ? 'blue' : skill.category === 'cooking' ? 'red' : skill.category === 'photography' ? 'purple' : 'green'}-500/20`}
+                style={{animationDelay: `${index * 150}ms`}}
+              >
+                <div className="relative">
+                  <img src={skill.image} alt={skill.title} className="w-full h-48 object-cover" />
+                  <div className="absolute top-3 right-3 bg-gray-900/80 backdrop-blur-sm px-2.5 py-1.5 rounded-full text-xs font-medium flex items-center">
+                    <Star size={14} className="text-yellow-400 mr-1.5" fill="#FACC15" />
+                    {skill.rating}
                   </div>
-                  <div className="text-sm text-gray-500">{course.students.toLocaleString()} students</div>
+                </div>
+                
+                <div className="p-6">
+                  <div className="flex items-center mb-3">
+                    {categories.find(cat => cat.id === skill.category).icon}
+                    <span className="ml-2 text-xs text-gray-400">{categories.find(cat => cat.id === skill.category).name}</span>
+                  </div>
+                  <h3 className="text-lg font-semibold mb-2">{skill.title}</h3>
+                  <p className="text-gray-400 text-sm mb-4">By {skill.instructor}</p>
+                  
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-gray-400 flex items-center">
+                      <Users size={14} className="mr-1.5" />
+                      {skill.students.toLocaleString()} students
+                    </span>
+                    <button className="text-blue-400 hover:text-blue-300 text-xs font-medium flex items-center transition-colors">
+                      Learn more <ArrowRight size={14} className="ml-1.5" />
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-        
-        <div className="text-center mt-12">
-          <a href="#" className="inline-flex items-center text-indigo-600 font-semibold hover:text-indigo-700">
-            Explore all courses
-            <ArrowRight size={16} className="ml-2" />
-          </a>
+            ))}
+          </div>
         </div>
       </section>
-      
+
+      {/* Stats Section */}
+      <section className="py-20 bg-gradient-to-b from-gray-900 to-gray-800">
+        <div className="container mx-auto px-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+            <div className="p-6">
+              <h3 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500 mb-2">2M+</h3>
+              <p className="text-gray-400">Active Learners</p>
+            </div>
+            <div className="p-6">
+              <h3 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500 mb-2">5K+</h3>
+              <p className="text-gray-400">Expert Instructors</p>
+            </div>
+            <div className="p-6">
+              <h3 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500 mb-2">1K+</h3>
+              <p className="text-gray-400">Courses Available</p>
+            </div>
+            <div className="p-6">
+              <h3 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500 mb-2">10M+</h3>
+              <p className="text-gray-400">Skills Learned</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Testimonials */}
-      <section className="bg-indigo-50 py-16">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">What Our Users Say</h2>
+      <section className="py-20 bg-gray-900">
+        <div className="container mx-auto px-6">
+          <h2 className="text-3xl font-bold mb-12 text-center">What Our Community Says</h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              <div className="flex items-center mb-4">
-                <img src="/api/placeholder/48/48" alt="User" className="w-12 h-12 rounded-full mr-4" />
-                <div>
-                  <h4 className="font-semibold text-gray-900">Emily Chen</h4>
-                  <p className="text-sm text-gray-500">UX Designer</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {testimonials.map((testimonial, index) => (
+              <div 
+                key={testimonial.id}
+                className={`bg-gray-800/80 backdrop-blur-sm p-8 rounded-xl border border-gray-700 transition-all duration-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                style={{animationDelay: `${index * 200}ms`}}
+              >
+                <div className="flex items-center mb-2">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} size={16} className="text-yellow-400 mr-1" fill="#FACC15" />
+                  ))}
+                </div>
+                <p className="text-gray-300 mb-6 italic">"{testimonial.text}"</p>
+                <div className="flex items-center">
+                  <div className="w-12 h-12 rounded-full bg-blue-500 mr-4 flex items-center justify-center text-white font-bold text-lg">
+                    {testimonial.author.charAt(0)}
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">{testimonial.author}</h4>
+                    <p className="text-sm text-gray-400">{testimonial.role}</p>
+                  </div>
                 </div>
               </div>
-              <p className="text-gray-600">
-                "I've tried many learning platforms, but SkillForge stands out with its community approach. I've not only learned new skills but also made valuable connections."
-              </p>
-              <div className="flex text-yellow-500 mt-4">
-                <Star size={16} className="fill-current" />
-                <Star size={16} className="fill-current" />
-                <Star size={16} className="fill-current" />
-                <Star size={16} className="fill-current" />
-                <Star size={16} className="fill-current" />
-              </div>
-            </div>
-            
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              <div className="flex items-center mb-4">
-                <img src="/api/placeholder/48/48" alt="User" className="w-12 h-12 rounded-full mr-4" />
-                <div>
-                  <h4 className="font-semibold text-gray-900">Marcus Johnson</h4>
-                  <p className="text-sm text-gray-500">Web Developer</p>
-                </div>
-              </div>
-              <p className="text-gray-600">
-                "The quality of courses here is exceptional. I went from basic JavaScript knowledge to building full-stack applications in just a few months."
-              </p>
-              <div className="flex text-yellow-500 mt-4">
-                <Star size={16} className="fill-current" />
-                <Star size={16} className="fill-current" />
-                <Star size={16} className="fill-current" />
-                <Star size={16} className="fill-current" />
-                <Star size={16} className="fill-current" />
-              </div>
-            </div>
-            
-            <div className="bg-white p-6 rounded-xl shadow-sm lg:block hidden">
-              <div className="flex items-center mb-4">
-                <img src="/api/placeholder/48/48" alt="User" className="w-12 h-12 rounded-full mr-4" />
-                <div>
-                  <h4 className="font-semibold text-gray-900">Sophia Rodriguez</h4>
-                  <p className="text-sm text-gray-500">Marketing Specialist</p>
-                </div>
-              </div>
-              <p className="text-gray-600">
-                "As an instructor, I love how easy it is to share my knowledge. The platform provides all the tools I need to create engaging courses."
-              </p>
-              <div className="flex text-yellow-500 mt-4">
-                <Star size={16} className="fill-current" />
-                <Star size={16} className="fill-current" />
-                <Star size={16} className="fill-current" />
-                <Star size={16} className="fill-current" />
-                <Star size={16} className="fill-current" />
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
-      
+
       {/* CTA Section */}
-      <section className="container mx-auto px-4 py-24">
-        <div className="bg-gradient-to-r from-indigo-600 to-blue-600 rounded-2xl shadow-xl overflow-hidden">
-          <div className="flex flex-col md:flex-row">
-            <div className="md:w-2/3 p-8 md:p-12">
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Ready to Start Your Learning Journey?</h2>
-              <p className="text-indigo-100 mb-8 md:pr-12">
-                Join thousands of learners and experts on SkillForge. Whether you want to learn new skills or share your expertise, our platform is the perfect place to grow.
-              </p>
+      <section className="py-24 bg-gradient-to-br from-gray-800 to-gray-900">
+        <div className="container mx-auto px-6">
+          <div className="bg-gradient-to-r from-blue-900/40 to-purple-900/40 rounded-2xl p-12 relative overflow-hidden backdrop-blur-sm">
+            <div className="absolute top-0 right-0 w-1/3 h-full opacity-20 bg-gradient-radial from-blue-400 to-transparent"></div>
+            
+            <div className="relative z-10 max-w-2xl">
+              <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to master new skills or share your expertise?</h2>
+              <p className="text-gray-300 mb-8 text-lg">Join our community today and transform your learning journey. Whether you want to learn or teach, we have the perfect platform for you.</p>
+              
               <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-                <button className="bg-white text-indigo-600 hover:bg-indigo-50 font-semibold py-3 px-6 rounded-lg">
-                  Join Now - It's Free
+                <button className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full hover:from-blue-600 hover:to-purple-700 transition-all font-medium shadow-lg shadow-blue-500/20">
+                  Join Now
                 </button>
-                <button className="bg-transparent border border-white text-white hover:bg-white hover:bg-opacity-10 font-semibold py-3 px-6 rounded-lg">
-                  Become an Instructor
+                <button className="px-8 py-4 bg-transparent border border-gray-400 rounded-full hover:border-white transition-all font-medium">
+                  Explore Courses
                 </button>
               </div>
-            </div>
-            <div className="md:w-1/3 relative hidden md:block">
-              <img 
-                src="/api/placeholder/400/400" 
-                alt="Learning" 
-                className="absolute bottom-0 right-0 h-full object-cover"
-              />
             </div>
           </div>
         </div>
       </section>
-      
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <div className="bg-white p-1 rounded">
-                  <Compass size={20} className="text-indigo-600" />
-                </div>
-                <span className="text-xl font-bold">SkillForge</span>
-              </div>
-              <p className="text-gray-400 mb-4">
-                Share knowledge. Grow together. Learn from the best and become the best.
-              </p>
-              <div className="flex space-x-4">
-                <a href="#" className="text-gray-400 hover:text-white">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                  </svg>
-                </a>
-                <a href="#" className="text-gray-400 hover:text-white">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723 9.99 9.99 0 01-3.127 1.195 4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z" />
-                  </svg>
-                </a>
-                <a href="#" className="text-gray-400 hover:text-white">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm4.441 16.892c-2.102.144-6.784.144-8.883 0C5.282 16.736 5.017 15.622 5 12c.017-3.629.285-4.736 2.558-4.892 2.099-.144 6.782-.144 8.883 0C18.718 7.264 18.982 8.378 19 12c-.018 3.629-.285 4.736-2.559 4.892zM10 9.658l4.917 2.338L10 14.342V9.658z" />
-                  </svg>
-                </a>
-                <a href="#" className="text-gray-400 hover:text-white">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.016 18.5h-2.512v-3.937c0-.939-.016-2.14-1.296-2.14-1.305 0-1.5 1.025-1.5 2.078v3.999H9.196V8.975h2.438v1.093h.031c.331-.64 1.14-1.312 2.35-1.312 2.487 0 2.947 1.631 2.947 3.765v5.979h.054zM6.393 7.886c-.837 0-1.524-.68-1.524-1.516 0-.837.683-1.524 1.524-1.524.846 0 1.524.687 1.524 1.524 0 .84-.678 1.516-1.524 1.516zm1.296 10.614h-2.55V8.975h2.55v9.525z" />
-                  </svg>
-                </a>
-              </div>
-            </div>
-            
-            <div>
-              <h3 className="font-semibold text-lg mb-4">Explore</h3>
-              <ul className="space-y-2">
-                <li><a href="#" className="text-gray-400 hover:text-white">Popular Courses</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white">New Releases</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white">Live Workshops</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white">Career Paths</a></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h3 className="font-semibold text-lg mb-4">Community</h3>
-              <ul className="space-y-2">
-                <li><a href="#" className="text-gray-400 hover:text-white">Forums</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white">Events</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white">Success Stories</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white">Become an Instructor</a></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h3 className="font-semibold text-lg mb-4">Support</h3>
-              <ul className="space-y-2">
-                <li><a href="#" className="text-gray-400 hover:text-white">Help Center</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white">Contact Us</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white">Privacy Policy</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white">Terms of Service</a></li>
-              </ul>
-            </div>
-          </div>
-          
-          <div className="border-t border-gray-800 pt-8 mt-8 text-center">
-            <p className="text-gray-400">© 2025 SkillForge. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
