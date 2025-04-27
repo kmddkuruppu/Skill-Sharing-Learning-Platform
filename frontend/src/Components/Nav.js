@@ -43,11 +43,14 @@ export default function Navigation() {
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-gray-900/95 backdrop-blur-md shadow-lg py-2' : 'bg-transparent py-4'}`}>
       <div className="container mx-auto px-6">
         <div className="flex items-center justify-between">
-          {/* Logo */}
-          <div className={`flex items-center transition-all duration-500 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'}`}>
+          {/* Logo with Home Link */}
+          <a 
+            href="/" 
+            className={`flex items-center transition-all duration-500 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'} cursor-pointer`}
+          >
             <BookOpen className="text-blue-400 mr-2" size={24} />
             <span className="font-bold text-xl bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">SkillShare</span>
-          </div>
+          </a>
           
           {/* Desktop Navigation */}
           <div className="hidden md:flex space-x-1">
@@ -126,10 +129,11 @@ export default function Navigation() {
         >
           <div className="flex flex-col h-full p-6">
             <div className="flex justify-between items-center mb-8">
-              <div className="flex items-center">
+              {/* Mobile Logo with Home Link */}
+              <a href="/" className="flex items-center">
                 <BookOpen className="text-blue-400 mr-2" size={24} />
                 <span className="font-bold text-xl bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">SkillShare</span>
-              </div>
+              </a>
               <button 
                 className="p-2 rounded-full text-gray-300 hover:text-white hover:bg-gray-800/80 transition-all"
                 onClick={() => setIsMobileMenuOpen(false)}
