@@ -51,11 +51,11 @@ export default function Footer() {
     {
       title: 'Company',
       links: [
-        { name: 'About Us', href: '#' },
+        { name: 'About Us', href: '/about' },
         { name: 'Careers', href: '#' },
         { name: 'Press', href: '#' },
         { name: 'Blog', href: '#' },
-        { name: 'Contact', href: '#' }
+        { name: 'Contact', href: '/contact' }
       ]
     },
     {
