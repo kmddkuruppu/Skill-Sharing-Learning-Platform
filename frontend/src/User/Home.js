@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, BookOpen, Code, Camera, TrendingUp, Star, ArrowRight, Users, Twitter, Facebook, Instagram, Linkedin } from 'lucide-react';
+import { Search, BookOpen, Code, Camera, TrendingUp, Star, ArrowRight, Users } from 'lucide-react';
 
 // Custom icon for ChefHat since it might be causing issues
 const ChefHat = ({ size = 24, className = "" }) => (
@@ -38,7 +38,7 @@ const Tool = ({ size = 24, className = "" }) => (
   </svg>
 );
 
-export default function HomePage() {
+export default function Home() {
   const [isVisible, setIsVisible] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('all');
   
@@ -87,29 +87,6 @@ export default function HomePage() {
       <header className={`relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 transition-all duration-1000 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
         <div className="absolute inset-0 bg-gradient-radial from-blue-900/20 via-transparent to-transparent"></div>
         
-        <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <BookOpen className="text-blue-400" />
-            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">SkillShare</span>
-          </div>
-          
-          <div className="hidden md:flex items-center space-x-8">
-            <a href="#" className="hover:text-blue-400 transition-colors">Explore</a>
-            <a href="#" className="hover:text-blue-400 transition-colors">Categories</a>
-            <a href="#" className="hover:text-blue-400 transition-colors">Teach</a>
-            <a href="#" className="hover:text-blue-400 transition-colors">About</a>
-          </div>
-          
-          <div className="flex items-center space-x-4">
-            <button className="px-4 py-2 rounded-full bg-transparent border border-blue-400 text-blue-400 hover:bg-blue-400 hover:text-gray-900 transition-all">
-              Log In
-            </button>
-            <button className="px-4 py-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 transition-all">
-              Sign Up
-            </button>
-          </div>
-        </nav>
-        
         <div className="container mx-auto px-6 py-20 flex flex-col md:flex-row items-center">
           <div className="md:w-1/2 md:pr-10 mb-10 md:mb-0">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
@@ -138,7 +115,7 @@ export default function HomePage() {
           
           <div className="md:w-1/2 relative">
             <div className={`bg-gray-800 rounded-2xl overflow-hidden shadow-xl transform transition-all duration-1000 ${isVisible ? 'translate-y-0' : 'translate-y-20'}`}>
-              <img src="/api/placeholder/600/400" alt="Learning Platform Preview" className="w-full h-auto" />
+              <img src="../assets/images/im1.jpg" alt="Learning Platform Preview" className="w-full h-auto" />
               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-gray-900 to-transparent p-6">
                 <div className="flex items-center">
                   <div className="flex -space-x-4">
@@ -338,75 +315,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="py-12 bg-gray-900 border-t border-gray-800">
-  <div className="container mx-auto px-6">
-    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
-      <div className="col-span-2 lg:col-span-1 mb-8 lg:mb-0">
-        <div className="flex items-center space-x-2 mb-6">
-          <BookOpen className="text-blue-400" />
-          <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">SkillShare</span>
-        </div>
-        <p className="text-gray-400 text-sm mb-6">Your platform for learning and sharing skills in an engaging community.</p>
-        <div className="flex space-x-4">
-          {/* Replace the empty placeholders with actual social icons */}
-          <a href="#" className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center hover:bg-gray-700 transition-colors">
-            <Twitter size={16} className="text-gray-400 hover:text-white" />
-          </a>
-          <a href="#" className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center hover:bg-gray-700 transition-colors">
-            <Facebook size={16} className="text-gray-400 hover:text-white" />
-          </a>
-          <a href="#" className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center hover:bg-gray-700 transition-colors">
-            <Instagram size={16} className="text-gray-400 hover:text-white" />
-          </a>
-          <a href="#" className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center hover:bg-gray-700 transition-colors">
-            <Linkedin size={16} className="text-gray-400 hover:text-white" />
-          </a>
-        </div>
-      </div>
-            
-            {['Categories', 'Company', 'Resources'].map((column, index) => (
-              <div key={column}>
-                <h3 className="text-lg font-semibold mb-4">{column}</h3>
-                <ul className="space-y-2">
-                  {[...Array(4)].map((_, i) => (
-                    <li key={i}>
-                      <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
-                        {column} Link {i + 1}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-            
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Subscribe</h3>
-              <p className="text-gray-400 text-sm mb-4">Get updates on new courses and features</p>
-              <div className="flex">
-                <input 
-                  type="email" 
-                  placeholder="Your email"
-                  className="flex-grow py-2 px-4 bg-gray-800 rounded-l-lg border border-gray-700 focus:outline-none focus:border-blue-400"
-                />
-                <button className="bg-blue-500 hover:bg-blue-600 transition-colors py-2 px-4 rounded-r-lg">
-                  <ArrowRight size={18} />
-                </button>
-              </div>
-            </div>
-          </div>
-          
-          <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-500 text-sm">© 2025 SkillShare. All rights reserved.</p>
-            <div className="flex space-x-6 mt-4 md:mt-0">
-              <a href="#" className="text-gray-500 hover:text-gray-300 text-sm">Privacy Policy</a>
-              <a href="#" className="text-gray-500 hover:text-gray-300 text-sm">Terms of Service</a>
-              <a href="#" className="text-gray-500 hover:text-gray-300 text-sm">Cookie Policy</a>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
