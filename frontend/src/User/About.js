@@ -87,7 +87,7 @@ export default function AboutUs() {
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-br from-gray-900/95 via-gray-800/90 to-gray-900/80 z-10"></div>
           <img 
-            src="/api/placeholder/1920/800" 
+            src="../assets/images/banner2.jpg" 
             alt="Team collaborating" 
             className="w-full h-full object-cover object-center"
           />
