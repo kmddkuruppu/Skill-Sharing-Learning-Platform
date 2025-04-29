@@ -3,6 +3,7 @@ package net.javaguides.sslp.controller;
 import net.javaguides.sslp.model.Learning;
 import net.javaguides.sslp.service.LearningService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,8 +19,9 @@ public class LearningController {
 
     // Create
     @PostMapping
-    public Learning createLearning(@RequestBody Learning learning) {
-        return learningService.createLearning(learning);
+    public ResponseEntity<String> createLearning(@RequestBody Learning learning) {
+        Learning createdLearning = learningService.createLearning(learning);
+        return ResponseEntity.ok("Learning course created successfully with ID: " + createdLearning.getId());
     }
 
     // Read all
@@ -36,13 +38,15 @@ public class LearningController {
 
     // Update
     @PutMapping("/{id}")
-    public Learning updateLearning(@PathVariable String id, @RequestBody Learning updatedLearning) {
-        return learningService.updateLearning(id, updatedLearning);
+    public ResponseEntity<String> updateLearning(@PathVariable String id, @RequestBody Learning updatedLearning) {
+        Learning learning = learningService.updateLearning(id, updatedLearning);
+        return ResponseEntity.ok("Learning course updated successfully with ID: " + learning.getId());
     }
 
     // Delete
     @DeleteMapping("/{id}")
-    public void deleteLearning(@PathVariable String id) {
+    public ResponseEntity<String> deleteLearning(@PathVariable String id) {
         learningService.deleteLearning(id);
+        return ResponseEntity.ok("Learning course deleted successfully with ID: " + id);
     }
 }
