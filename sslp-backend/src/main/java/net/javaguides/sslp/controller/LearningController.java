@@ -3,6 +3,7 @@ package net.javaguides.sslp.controller;
 import net.javaguides.sslp.model.Learning;
 import net.javaguides.sslp.service.LearningService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,8 +19,10 @@ public class LearningController {
 
     // Create
     @PostMapping
-    public Learning createLearning(@RequestBody Learning learning) {
-        return learningService.createLearning(learning);
+    public ResponseEntity<String> createLearning(@RequestBody Learning learning) {
+        Learning created = learningService.createLearning(learning);
+        String message = String.format("✅ Successfully added course '%s' with ID '%s'.", created.getCourseName(), created.getCourseId());
+        return ResponseEntity.ok(message);
     }
 
     // Read all
@@ -36,13 +39,22 @@ public class LearningController {
 
     // Update
     @PutMapping("/{id}")
-    public Learning updateLearning(@PathVariable String id, @RequestBody Learning updatedLearning) {
-        return learningService.updateLearning(id, updatedLearning);
+    public ResponseEntity<String> updateLearning(@PathVariable String id, @RequestBody Learning updatedLearning) {
+        Learning updated = learningService.updateLearning(id, updatedLearning);
+        String message = String.format("✅ Successfully updated course '%s' with ID '%s'.", updated.getCourseName(), updated.getCourseId());
+        return ResponseEntity.ok(message);
     }
 
     // Delete
     @DeleteMapping("/{id}")
-    public void deleteLearning(@PathVariable String id) {
-        learningService.deleteLearning(id);
+    public ResponseEntity<String> deleteLearning(@PathVariable String id) {
+        Optional<Learning> learning = learningService.getLearningById(id);
+        if (learning.isPresent()) {
+            learningService.deleteLearning(id);
+            String message = String.format("🗑️ Successfully deleted course '%s' with ID '%s'.", learning.get().getCourseName(), learning.get().getCourseId());
+            return ResponseEntity.ok(message);
+        } else {
+            return ResponseEntity.status(404).body("❌ Course not found for ID: " + id);
+        }
     }
 }
