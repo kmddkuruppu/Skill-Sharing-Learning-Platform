@@ -24,7 +24,7 @@ export default function Navigation() {
   }, []);
 
   const navLinks = [
-    { name: 'Explore', href: '#' },
+    { name: 'Explore', href: '/course' },
     { name: 'Categories', href: '#' },
     { name: 'Teach', href: '#' },
     { name: 'Community', href: '#' }
