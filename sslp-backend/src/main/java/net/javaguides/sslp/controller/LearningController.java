@@ -20,8 +20,9 @@ public class LearningController {
     // Create
     @PostMapping
     public ResponseEntity<String> createLearning(@RequestBody Learning learning) {
-        Learning createdLearning = learningService.createLearning(learning);
-        return ResponseEntity.ok("Learning course created successfully with ID: " + createdLearning.getId());
+        Learning created = learningService.createLearning(learning);
+        String message = String.format("✅ Successfully added course '%s' with ID '%s'.", created.getCourseName(), created.getCourseId());
+        return ResponseEntity.ok(message);
     }
 
     // Read all
@@ -39,14 +40,21 @@ public class LearningController {
     // Update
     @PutMapping("/{id}")
     public ResponseEntity<String> updateLearning(@PathVariable String id, @RequestBody Learning updatedLearning) {
-        Learning learning = learningService.updateLearning(id, updatedLearning);
-        return ResponseEntity.ok("Learning course updated successfully with ID: " + learning.getId());
+        Learning updated = learningService.updateLearning(id, updatedLearning);
+        String message = String.format("✅ Successfully updated course '%s' with ID '%s'.", updated.getCourseName(), updated.getCourseId());
+        return ResponseEntity.ok(message);
     }
 
     // Delete
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteLearning(@PathVariable String id) {
-        learningService.deleteLearning(id);
-        return ResponseEntity.ok("Learning course deleted successfully with ID: " + id);
+        Optional<Learning> learning = learningService.getLearningById(id);
+        if (learning.isPresent()) {
+            learningService.deleteLearning(id);
+            String message = String.format("🗑️ Successfully deleted course '%s' with ID '%s'.", learning.get().getCourseName(), learning.get().getCourseId());
+            return ResponseEntity.ok(message);
+        } else {
+            return ResponseEntity.status(404).body("❌ Course not found for ID: " + id);
+        }
     }
 }
