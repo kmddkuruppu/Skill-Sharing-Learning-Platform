@@ -9,6 +9,9 @@ import About from './User/About';
 import Contact from './User/Contact';
 import Learning from './User/Learning';
 import Course from './User/Course'
+import Success from './User/Success';
+import Instructor from './User/Instructor';
+import Community from './User/Community';
 
 //import Admin pages
 import AddCouse from './Admin/AddCouse';
@@ -25,7 +28,9 @@ function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path='/learning' element={<Learning />} />
           <Route path='/course' element={<Course />} />
-
+          <Route path='/success' element={<Success />} />
+          <Route path='/instructor' element={<Instructor />} />
+          <Route path='/community' element={<Community />} />
 
 
           {/* Admin */}
