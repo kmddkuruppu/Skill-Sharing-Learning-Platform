@@ -17,7 +17,7 @@ import {
   Tag
 } from 'lucide-react';
 
-export default function CourseAdminForm() {
+export default function CourseAdminForm({ onCourseSubmit }) {
   const [isVisible, setIsVisible] = useState(false);
   const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
   const [jobOpportunities, setJobOpportunities] = useState(['']);
@@ -158,8 +158,18 @@ export default function CourseAdminForm() {
       return;
     }
     
-    // Here you would normally send the data to your API
-    console.log("Form submitted:", formData);
+    // Prepare course data for submission
+    const newCourse = {
+      ...formData,
+      jobOpportunities: jobOpportunities.filter(job => job.trim() !== ''),
+      image: "/api/placeholder/400/250", // Default placeholder for new courses
+      students: 0, // New courses start with 0 students
+    };
+    
+    // Send to parent component
+    if (onCourseSubmit) {
+      onCourseSubmit(newCourse);
+    }
     
     // Show success message
     setSuccessMessage('Course added successfully!');
