@@ -15,6 +15,7 @@ import Community from './User/Community';
 
 //import Admin pages
 import AddCouse from './Admin/AddCouse';
+import View from './Admin/View';
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
 
           {/* Admin */}
           <Route path='/addcourse' element={<AddCouse />} />
+          <Route path='/view' element={<View />} />
         </Routes>
         <Footer />
       </Router>
