@@ -400,7 +400,7 @@ export default function LearningManagement() {
                       {learning.courseName}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
-                      ${learning.courseFee.toFixed(2)}
+                      LKR.{learning.courseFee.toFixed(2)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
                       {learning.duration}
