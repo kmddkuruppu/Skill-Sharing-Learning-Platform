@@ -1,7 +1,7 @@
-package net.javaguides.sslp.repository;
+package net.javaguides.sslp.repo;
 
 import net.javaguides.sslp.model.SkillPost;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
-public interface SkillPostRepository extends JpaRepository<SkillPost, Long> {
+public interface SkillPostRepository extends MongoRepository<SkillPost, String> {
 }
