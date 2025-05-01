@@ -16,11 +16,12 @@ import Community from './User/Community';
 // import Admin pages
 import AddCouse from './Admin/AddCouse';
 import View from './Admin/View';
+import Skill from './Admin/Skill';
 
 // layout wrapper to handle conditional Nav/Footer
 function LayoutWrapper() {
   const location = useLocation();
-  const hideLayout = location.pathname === '/View';
+  const hideLayout = ['/view', '/skill'].includes(location.pathname.toLowerCase());
 
   return (
     <>
@@ -39,11 +40,13 @@ function LayoutWrapper() {
         {/* Admin */}
         <Route path='/addcourse' element={<AddCouse />} />
         <Route path='/view' element={<View />} />
+        <Route path='/skill' element={<Skill />} />
       </Routes>
       {!hideLayout && <Footer />}
     </>
   );
 }
+
 
 function App() {
   return (
