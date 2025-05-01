@@ -4,7 +4,6 @@ import Nav from './Components/Nav';
 import Footer from './Components/Footer';
 
 // import User pages
-import Interface from './User/Interface';
 import Home from './User/Home';
 import About from './User/About';
 import Contact from './User/Contact';
@@ -29,8 +28,7 @@ function LayoutWrapper() {
       {!hideLayout && <Nav />}
       <Routes>
         {/* User */}
-        <Route path="/" element={<Interface />} />
-        <Route path="/home" element={<Home />} />
+        <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path='/learning' element={<Learning />} />
