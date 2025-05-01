@@ -15,7 +15,7 @@ export default function SuccessAlert({
     "from-cyan-400 to-cyan-600"
   ];
 
-  // Success confetti animation component
+  // Success confetti animation components
   const SuccessConfetti = () => (
     <>
       {[...Array(100)].map((_, i) => (
