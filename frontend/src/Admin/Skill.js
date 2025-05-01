@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { Trash2, Edit, Plus, Search, ChevronDown, ChevronUp, RefreshCw, Tag } from "lucide-react";
-import { motion } from "framer-motion";
+import { Trash2, Edit, Plus, Search, ChevronDown, ChevronUp, RefreshCw, ChevronRight, ChevronLeft } from "lucide-react";
 
 //import Success Alert 
 import SuccessAlert from "../Components/SuccessAlert";
@@ -20,7 +19,6 @@ export default function SkillManagement() {
     howYouUseIt: "",
     tags: [],
     availabilityForCollaboration: false,
-    // Date and time will be automatically set when saving
   });
   const [currentTag, setCurrentTag] = useState("");
   const [notification, setNotification] = useState({ show: false, message: "", type: "" });
@@ -29,6 +27,9 @@ export default function SkillManagement() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [successAction, setSuccessAction] = useState("");
   const [successSkillName, setSuccessSkillName] = useState("");
+  const [expandedRows, setExpandedRows] = useState({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
 
   const API_URL = "http://localhost:8080/api/skills";
 
@@ -63,17 +64,12 @@ export default function SkillManagement() {
     setSuccessAction(action);
     setSuccessSkillName(skillName);
     setShowSuccess(true);
-    
-    // Hide success after 3.5 seconds
-    setTimeout(() => {
-      setShowSuccess(false);
-    }, 3500);
+    setTimeout(() => setShowSuccess(false), 3500);
   };
 
-  // Create new skill with current date and time
+  // Create new skill
   const createSkill = async () => {
     try {
-      // Add current date and time to formData before submission
       const submissionData = {
         ...formData,
         date: new Date().toISOString().split('T')[0],
@@ -86,11 +82,8 @@ export default function SkillManagement() {
         body: JSON.stringify(submissionData)
       });
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
       
-      const data = await response.json();
       showNotification("Skill added successfully", "success");
       showSuccessAlert("added", formData.skillTitle);
       fetchSkills();
@@ -101,10 +94,9 @@ export default function SkillManagement() {
     }
   };
 
-  // Update skill with current date and time
+  // Update skill
   const updateSkill = async () => {
     try {
-      // Update date and time to current values before submission
       const submissionData = {
         ...formData,
         date: new Date().toISOString().split('T')[0],
@@ -117,11 +109,8 @@ export default function SkillManagement() {
         body: JSON.stringify(submissionData)
       });
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
       
-      const data = await response.json();
       showNotification("Skill updated successfully", "success");
       showSuccessAlert("updated", formData.skillTitle);
       fetchSkills();
@@ -137,10 +126,7 @@ export default function SkillManagement() {
     if (window.confirm(`Are you sure you want to delete "${skillTitle}"?`)) {
       try {
         const response = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
         
         showNotification("Skill deleted successfully", "success");
         showSuccessAlert("deleted", skillTitle);
@@ -151,7 +137,15 @@ export default function SkillManagement() {
     }
   };
 
-  // Handle edit button click
+  // Toggle expanded row
+  const toggleRowExpansion = (id) => {
+    setExpandedRows(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
+
+  // Handle edit
   const handleEdit = (skill) => {
     setFormData({
       id: skill.id,
@@ -163,7 +157,6 @@ export default function SkillManagement() {
       howYouUseIt: skill.howYouUseIt || "",
       tags: skill.tags || [],
       availabilityForCollaboration: skill.availabilityForCollaboration || false
-      // Date and time will be updated automatically when saving
     });
     setIsEditing(true);
     setIsAdding(false);
@@ -179,9 +172,7 @@ export default function SkillManagement() {
   };
 
   // Handle tag input
-  const handleTagInput = (e) => {
-    setCurrentTag(e.target.value);
-  };
+  const handleTagInput = (e) => setCurrentTag(e.target.value);
 
   // Add tag
   const addTag = (e) => {
@@ -214,7 +205,6 @@ export default function SkillManagement() {
       howYouUseIt: "",
       tags: [],
       availabilityForCollaboration: false
-      // Date and time will be set when saving
     });
     setCurrentTag("");
   };
@@ -228,6 +218,7 @@ export default function SkillManagement() {
     setSortConfig({ key, direction });
   };
 
+  // Apply sorting and filtering
   const sortedSkills = [...skills].sort((a, b) => {
     if (sortConfig.key) {
       const aValue = a[sortConfig.key];
@@ -242,12 +233,8 @@ export default function SkillManagement() {
         if (!aValue) return sortConfig.direction === 'ascending' ? 1 : -1;
         if (!bValue) return sortConfig.direction === 'ascending' ? -1 : 1;
         
-        if (aValue < bValue) {
-          return sortConfig.direction === 'ascending' ? -1 : 1;
-        }
-        if (aValue > bValue) {
-          return sortConfig.direction === 'ascending' ? 1 : -1;
-        }
+        if (aValue < bValue) return sortConfig.direction === 'ascending' ? -1 : 1;
+        if (aValue > bValue) return sortConfig.direction === 'ascending' ? 1 : -1;
         return 0;
       }
     }
@@ -259,8 +246,15 @@ export default function SkillManagement() {
     (skill.skillTitle && skill.skillTitle.toLowerCase().includes(searchTerm.toLowerCase())) ||
     (skill.name && skill.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
     (skill.skillDescription && skill.skillDescription.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (skill.emailAddress && skill.emailAddress.toLowerCase().includes(searchTerm.toLowerCase())) ||
     (skill.tags && skill.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())))
   );
+
+  // Pagination
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredSkills.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredSkills.length / itemsPerPage);
 
   // Show notification
   const showNotification = (message, type) => {
@@ -268,13 +262,6 @@ export default function SkillManagement() {
     setTimeout(() => {
       setNotification({ show: false, message: "", type: "" });
     }, 5000);
-  };
-
-  // Helper function to truncate text
-  const truncateText = (text, maxLength = 50) => {
-    if (!text) return "";
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + "...";
   };
 
   // Format date for display
@@ -288,7 +275,6 @@ export default function SkillManagement() {
     <div className="container mx-auto p-4 max-w-6xl relative">
       <h1 className="text-3xl font-bold mb-6 text-gray-800">Skill Management</h1>
       
-      {/* Import the SuccessAlert component */}
       <SuccessAlert 
         showSuccess={showSuccess}
         successAction={successAction}
@@ -296,7 +282,7 @@ export default function SkillManagement() {
         onHide={() => setShowSuccess(false)}
       />
 
-      {/* Regular Notification */}
+      {/* Notification */}
       {notification.show && (
         <div className={`p-4 mb-4 rounded-lg flex items-center ${
           notification.type === "success" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
@@ -318,7 +304,7 @@ export default function SkillManagement() {
         <div className="relative w-full md:w-1/2">
           <input
             type="text"
-            placeholder="Search skills..."
+            placeholder="Search skills by name, title, description, email, or tags..."
             className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -347,12 +333,7 @@ export default function SkillManagement() {
 
       {/* Add/Edit Form */}
       {(isAdding || isEditing) && (
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          className="mb-8 p-6 bg-gray-50 rounded-lg shadow-md"
-        >
+        <div className="mb-8 p-6 bg-gray-50 rounded-lg shadow-md">
           <h2 className="text-xl font-semibold mb-4">{isAdding ? "Add New Skill" : "Edit Skill"}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -478,18 +459,14 @@ export default function SkillManagement() {
             </div>
             
             <div className="md:col-span-2 flex gap-4 mt-4">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              <button
                 onClick={isAdding ? createSkill : updateSkill}
                 className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
               >
                 {isAdding ? "Add Skill" : "Update Skill"}
-              </motion.button>
+              </button>
               
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              <button
                 onClick={() => {
                   setIsAdding(false);
                   setIsEditing(false);
@@ -498,10 +475,10 @@ export default function SkillManagement() {
                 className="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-400 transition-colors"
               >
                 Cancel
-              </motion.button>
+              </button>
             </div>
           </div>
-        </motion.div>
+        </div>
       )}
 
       {/* Table */}
@@ -524,6 +501,7 @@ export default function SkillManagement() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8"></th>
                   <th onClick={() => requestSort('name')} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">
                     <div className="flex items-center">
                       Name
@@ -548,6 +526,14 @@ export default function SkillManagement() {
                       )}
                     </div>
                   </th>
+                  <th onClick={() => requestSort('date')} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">
+                    <div className="flex items-center">
+                      Date
+                      {sortConfig.key === 'date' && (
+                        sortConfig.direction === 'ascending' ? <ChevronUp size={16} /> : <ChevronDown size={16} />
+                      )}
+                    </div>
+                  </th>
                   <th onClick={() => requestSort('availabilityForCollaboration')} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">
                     <div className="flex items-center">
                       Available
@@ -556,73 +542,128 @@ export default function SkillManagement() {
                       )}
                     </div>
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Tags
-                  </th>
                   <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredSkills.map((skill) => (
-                  <motion.tr 
-                    key={skill.id} 
-                    className="hover:bg-gray-50"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <td className="px-4 py-4 text-sm font-medium text-gray-900">
-                      {skill.name}
-                    </td>
-                    <td className="px-4 py-4 text-sm text-gray-800">
-                      {skill.skillTitle}
-                    </td>
-                    <td className="px-4 py-4 text-sm text-gray-800">
-                      {skill.experienceLevel}
-                    </td>
-                    <td className="px-4 py-4 text-sm text-gray-800">
-                      {skill.availabilityForCollaboration ? 
-                        <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Yes</span> : 
-                        <span className="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">No</span>
-                      }
-                    </td>
-                    <td className="px-4 py-4 text-sm text-gray-800">
-                      <div className="flex flex-wrap gap-1">
-                        {skill.tags && skill.tags.map((tag, idx) => (
-                          <span key={idx} className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full text-xs">
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    </td>
-                    <td className="px-4 py-4 text-sm text-gray-800 text-right">
-                      <div className="inline-flex items-center gap-3">
-                        <motion.button
-                          whileHover={{ scale: 1.2 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={() => handleEdit(skill)}
-                          className="text-blue-600 hover:text-blue-800"
-                          title="Edit skill"
+                {currentItems.map((skill) => (
+                  <>
+                    <tr key={skill.id} className="hover:bg-gray-50">
+                      <td className="px-2 py-4 text-center">
+                        <button
+                          onClick={() => toggleRowExpansion(skill.id)}
+                          className="text-gray-500 hover:text-gray-700"
                         >
-                          <Edit size={20} />
-                        </motion.button>
-                        <motion.button
-                          whileHover={{ scale: 1.2 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={() => deleteSkill(skill.id, skill.skillTitle)}
-                          className="text-red-600 hover:text-red-800"
-                          title="Delete skill"
-                        >
-                          <Trash2 size={20} />
-                        </motion.button>
-                      </div>
-                    </td>
-                  </motion.tr>
+                          {expandedRows[skill.id] ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+                        </button>
+                      </td>
+                      <td className="px-4 py-4 text-sm font-medium text-gray-900">
+                        {skill.name}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-800">
+                        {skill.skillTitle}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-800">
+                        {skill.experienceLevel}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-800">
+                        {formatDate(skill.date)}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-800">
+                        {skill.availabilityForCollaboration ? 
+                          <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Yes</span> : 
+                          <span className="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">No</span>
+                        }
+                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-800 text-right">
+                        <div className="inline-flex items-center gap-3">
+                          <button
+                            onClick={() => handleEdit(skill)}
+                            className="text-blue-600 hover:text-blue-800"
+                            title="Edit skill"
+                          >
+                            <Edit size={20} />
+                          </button>
+                          <button
+                            onClick={() => deleteSkill(skill.id, skill.skillTitle)}
+                            className="text-red-600 hover:text-red-800"
+                            title="Delete skill"
+                          >
+                            <Trash2 size={20} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                    {expandedRows[skill.id] && (
+                      <tr key={`expanded-${skill.id}`} className="bg-gray-50">
+                        <td colSpan="7" className="px-6 py-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                              <h4 className="font-medium text-gray-800 mb-2">Contact Information</h4>
+                              <p><span className="font-medium">Email:</span> {skill.emailAddress || "N/A"}</p>
+                              <p><span className="font-medium">Time:</span> {skill.time || "N/A"}</p>
+                            </div>
+                            <div>
+                              <h4 className="font-medium text-gray-800 mb-2">Tags</h4>
+                              <div className="flex flex-wrap gap-1">
+                                {skill.tags && skill.tags.length > 0 ? skill.tags.map((tag, idx) => (
+                                  <span key={idx} className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full text-xs">
+                                    {tag}
+                                  </span>
+                                )) : <span className="text-gray-500">No tags</span>}
+                              </div>
+                            </div>
+                            <div className="md:col-span-2">
+                              <h4 className="font-medium text-gray-800 mb-2">Skill Description</h4>
+                              <p className="text-gray-700">{skill.skillDescription || "No description provided."}</p>
+                            </div>
+                            <div className="md:col-span-2">
+                              <h4 className="font-medium text-gray-800 mb-2">How It's Used</h4>
+                              <p className="text-gray-700">{skill.howYouUseIt || "No usage information provided."}</p>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </>
                 ))}
               </tbody>
             </table>
+            
+            {/* Pagination */}
+            {filteredSkills.length > itemsPerPage && (
+              <div className="px-4 py-3 flex items-center justify-between border-t border-gray-200">
+                <div className="flex-1 flex justify-between items-center">
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md ${
+                      currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    <ChevronLeft size={16} className="mr-1" />
+                    Previous
+                  </button>
+                  
+                  <span className="text-sm text-gray-700">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md ${
+                      currentPage === totalPages ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    Next
+                    <ChevronRight size={16} className="ml-1" />
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
