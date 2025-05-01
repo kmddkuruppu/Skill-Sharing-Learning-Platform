@@ -180,7 +180,8 @@ export default function LearningManagement() {
   const filteredLearnings = sortedLearnings.filter(learning => 
     learning.courseName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     learning.courseId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    learning.description.toLowerCase().includes(searchTerm.toLowerCase())
+    learning.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (learning.jobOpportunities && learning.jobOpportunities.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   // Show notification
@@ -189,6 +190,13 @@ export default function LearningManagement() {
     setTimeout(() => {
       setNotification({ show: false, message: "", type: "" });
     }, 5000);
+  };
+
+  // Helper function to truncate text
+  const truncateText = (text, maxLength = 50) => {
+    if (!text) return "";
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + "...";
   };
 
   return (
@@ -353,7 +361,7 @@ export default function LearningManagement() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th onClick={() => requestSort('courseId')} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">
+                  <th onClick={() => requestSort('courseId')} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">
                     <div className="flex items-center">
                       Course ID
                       {sortConfig.key === 'courseId' && (
@@ -361,7 +369,7 @@ export default function LearningManagement() {
                       )}
                     </div>
                   </th>
-                  <th onClick={() => requestSort('courseName')} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">
+                  <th onClick={() => requestSort('courseName')} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">
                     <div className="flex items-center">
                       Course Name
                       {sortConfig.key === 'courseName' && (
@@ -369,7 +377,7 @@ export default function LearningManagement() {
                       )}
                     </div>
                   </th>
-                  <th onClick={() => requestSort('courseFee')} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">
+                  <th onClick={() => requestSort('courseFee')} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">
                     <div className="flex items-center">
                       Fee
                       {sortConfig.key === 'courseFee' && (
@@ -377,7 +385,7 @@ export default function LearningManagement() {
                       )}
                     </div>
                   </th>
-                  <th onClick={() => requestSort('duration')} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">
+                  <th onClick={() => requestSort('duration')} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">
                     <div className="flex items-center">
                       Duration
                       {sortConfig.key === 'duration' && (
@@ -385,7 +393,15 @@ export default function LearningManagement() {
                       )}
                     </div>
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th onClick={() => requestSort('jobOpportunities')} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">
+                    <div className="flex items-center">
+                      Job Opportunities
+                      {sortConfig.key === 'jobOpportunities' && (
+                        sortConfig.direction === 'ascending' ? <ChevronUp size={16} /> : <ChevronDown size={16} />
+                      )}
+                    </div>
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -393,19 +409,24 @@ export default function LearningManagement() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredLearnings.map((learning) => (
                   <tr key={learning.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <td className="px-4 py-4 text-sm font-medium text-gray-900">
                       {learning.courseId}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
+                    <td className="px-4 py-4 text-sm text-gray-800">
                       {learning.courseName}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
+                    <td className="px-4 py-4 text-sm text-gray-800">
                       LKR.{learning.courseFee.toFixed(2)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
+                    <td className="px-4 py-4 text-sm text-gray-800">
                       {learning.duration}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 text-right">
+                    <td className="px-4 py-4 text-sm text-gray-800">
+                      <div className="max-w-xs overflow-hidden" title={learning.jobOpportunities}>
+                        {truncateText(learning.jobOpportunities, 100)}
+                      </div>
+                    </td>
+                    <td className="px-4 py-4 text-sm text-gray-800 text-right">
                       <div className="inline-flex items-center gap-3">
                         <button
                           onClick={() => handleEdit(learning)}
