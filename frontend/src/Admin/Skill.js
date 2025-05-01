@@ -20,8 +20,7 @@ export default function SkillManagement() {
     howYouUseIt: "",
     tags: [],
     availabilityForCollaboration: false,
-    date: new Date().toISOString().split('T')[0],
-    time: new Date().toTimeString().split(' ')[0].slice(0, 5)
+    // Date and time will be automatically set when saving
   });
   const [currentTag, setCurrentTag] = useState("");
   const [notification, setNotification] = useState({ show: false, message: "", type: "" });
@@ -71,13 +70,20 @@ export default function SkillManagement() {
     }, 3500);
   };
 
-  // Create new skill
+  // Create new skill with current date and time
   const createSkill = async () => {
     try {
+      // Add current date and time to formData before submission
+      const submissionData = {
+        ...formData,
+        date: new Date().toISOString().split('T')[0],
+        time: new Date().toTimeString().split(' ')[0].slice(0, 5)
+      };
+      
       const response = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(submissionData)
       });
       
       if (!response.ok) {
@@ -95,13 +101,20 @@ export default function SkillManagement() {
     }
   };
 
-  // Update skill
+  // Update skill with current date and time
   const updateSkill = async () => {
     try {
+      // Update date and time to current values before submission
+      const submissionData = {
+        ...formData,
+        date: new Date().toISOString().split('T')[0],
+        time: new Date().toTimeString().split(' ')[0].slice(0, 5)
+      };
+      
       const response = await fetch(`${API_URL}/${formData.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(submissionData)
       });
       
       if (!response.ok) {
@@ -149,9 +162,8 @@ export default function SkillManagement() {
       experienceLevel: skill.experienceLevel || "Beginner",
       howYouUseIt: skill.howYouUseIt || "",
       tags: skill.tags || [],
-      availabilityForCollaboration: skill.availabilityForCollaboration || false,
-      date: skill.date ? skill.date.split('T')[0] : new Date().toISOString().split('T')[0],
-      time: skill.time ? skill.time.substring(0, 5) : new Date().toTimeString().split(' ')[0].slice(0, 5)
+      availabilityForCollaboration: skill.availabilityForCollaboration || false
+      // Date and time will be updated automatically when saving
     });
     setIsEditing(true);
     setIsAdding(false);
@@ -201,9 +213,8 @@ export default function SkillManagement() {
       experienceLevel: "Beginner",
       howYouUseIt: "",
       tags: [],
-      availabilityForCollaboration: false,
-      date: new Date().toISOString().split('T')[0],
-      time: new Date().toTimeString().split(' ')[0].slice(0, 5)
+      availabilityForCollaboration: false
+      // Date and time will be set when saving
     });
     setCurrentTag("");
   };
@@ -447,26 +458,10 @@ export default function SkillManagement() {
               </div>
             </div>
             
-            <div>
-              <label className="block text-gray-700 mb-1">Date</label>
-              <input
-                type="date"
-                name="date"
-                value={formData.date}
-                onChange={handleChange}
-                className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-gray-700 mb-1">Time</label>
-              <input
-                type="time"
-                name="time"
-                value={formData.time}
-                onChange={handleChange}
-                className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+            <div className="md:col-span-2">
+              <div className="text-gray-600 italic mb-2">
+                Date and time will be automatically set when saving the skill.
+              </div>
             </div>
             
             <div className="md:col-span-2">
