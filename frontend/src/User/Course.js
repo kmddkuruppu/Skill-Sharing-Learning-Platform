@@ -1,93 +1,14 @@
 import { useState, useEffect } from 'react';
-import { TrendingUp, Clock, Briefcase, User, Star, ChevronRight, Filter, Search } from 'lucide-react';
+import { TrendingUp, Clock, Briefcase, User, Star, ChevronRight, Filter, Search, Loader2 } from 'lucide-react';
 
 export default function CoursesDisplayWall() {
   const [isVisible, setIsVisible] = useState(false);
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [courses, setCourses] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   
-  // Sample course data
-  const courses = [
-    {
-      courseId: "FE001",
-      courseName: "Advanced React Development",
-      courseFee: "$149.99",
-      description: "Master React hooks, context API, Redux, and build production-ready applications with best practices and modern architecture patterns.",
-      duration: "10 weeks",
-      category: "frontend",
-      rating: 4.9,
-      students: 3254,
-      instructor: "Alex Johnson",
-      jobOpportunities: ["Frontend Developer", "React Specialist", "UI Engineer"],
-      image: "/api/placeholder/400/250"
-    },
-    {
-      courseId: "BE002",
-      courseName: "Node.js Microservices Architecture",
-      courseFee: "$179.99",
-      description: "Learn to design, develop, and deploy scalable microservices using Node.js, Express, Docker, and Kubernetes.",
-      duration: "12 weeks",
-      category: "backend",
-      rating: 4.8,
-      students: 2187,
-      instructor: "Sophia Chen",
-      jobOpportunities: ["Backend Developer", "Node.js Engineer", "DevOps Specialist"],
-      image: "/api/placeholder/400/250"
-    },
-    {
-      courseId: "DS003",
-      courseName: "Data Science with Python",
-      courseFee: "$199.99",
-      description: "Comprehensive training in data analysis, visualization, machine learning, and predictive modeling using Python's powerful libraries.",
-      duration: "14 weeks",
-      category: "datascience",
-      rating: 4.9,
-      students: 4120,
-      instructor: "Michael Rodriguez",
-      jobOpportunities: ["Data Scientist", "ML Engineer", "Data Analyst"],
-      image: "/api/placeholder/400/250"
-    },
-    {
-      courseId: "UI004",
-      courseName: "UI/UX Design Masterclass",
-      courseFee: "$129.99",
-      description: "From user research to high-fidelity prototypes, learn the complete design process with Figma, Adobe XD, and design thinking methodologies.",
-      duration: "8 weeks",
-      category: "design",
-      rating: 4.7,
-      students: 2876,
-      instructor: "Emma Wilson",
-      jobOpportunities: ["UI Designer", "UX Researcher", "Product Designer"],
-      image: "/api/placeholder/400/250"
-    },
-    {
-      courseId: "MB005",
-      courseName: "Flutter Mobile App Development",
-      courseFee: "$159.99",
-      description: "Build beautiful cross-platform mobile applications for iOS and Android using Flutter and Dart.",
-      duration: "11 weeks",
-      category: "mobile",
-      rating: 4.8,
-      students: 1953,
-      instructor: "David Park",
-      jobOpportunities: ["Flutter Developer", "Mobile App Engineer", "Cross-platform Developer"],
-      image: "/api/placeholder/400/250"
-    },
-    {
-      courseId: "CL006",
-      courseName: "AWS Cloud Solutions Architect",
-      courseFee: "$219.99",
-      description: "Learn to design, deploy, and maintain scalable, highly available systems on AWS cloud infrastructure.",
-      duration: "12 weeks",
-      category: "cloud",
-      rating: 4.9,
-      students: 3124,
-      instructor: "Priya Sharma",
-      jobOpportunities: ["Cloud Architect", "AWS Specialist", "DevOps Engineer"],
-      image: "/api/placeholder/400/250"
-    }
-  ];
-
   // Categories for filtering
   const categories = [
     { id: 'all', name: 'All Courses' },
@@ -98,6 +19,68 @@ export default function CoursesDisplayWall() {
     { id: 'mobile', name: 'Mobile Dev' },
     { id: 'cloud', name: 'Cloud Computing' }
   ];
+
+  // Fetch courses from the backend API
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch('http://localhost:8080/api/learnings');
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        // Transform the data to match our component's expected format
+        const transformedData = data.map(course => ({
+          // Use MongoDB ID for React key
+          id: course.id,
+          courseId: course.courseId,
+          courseName: course.courseName,
+          courseFee: `$${course.courseFee}`,
+          description: course.description,
+          duration: course.duration,
+          // Parse job opportunities from string to array
+          jobOpportunities: course.jobOpportunities ? course.jobOpportunities.split(',').map(job => job.trim()) : [],
+          // Default values for fields not in the MongoDB model
+          category: inferCategoryFromCourseName(course.courseName),
+          rating: 4.8,
+          students: Math.floor(Math.random() * 3000) + 1000,
+          instructor: "Expert Instructor"
+        }));
+        
+        setCourses(transformedData);
+        setError(null);
+      } catch (err) {
+        setError(`Failed to fetch courses: ${err.message}`);
+        console.error("Error fetching courses:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchCourses();
+  }, []);
+
+  // Helper function to infer category from course name
+  const inferCategoryFromCourseName = (courseName) => {
+    const name = courseName.toLowerCase();
+    if (name.includes('react') || name.includes('frontend') || name.includes('javascript') || name.includes('html')) 
+      return 'frontend';
+    if (name.includes('node') || name.includes('java') || name.includes('spring') || name.includes('backend'))
+      return 'backend';
+    if (name.includes('ui') || name.includes('ux') || name.includes('design'))
+      return 'design';
+    if (name.includes('data') || name.includes('python') || name.includes('machine learning'))
+      return 'datascience';
+    if (name.includes('mobile') || name.includes('android') || name.includes('ios') || name.includes('flutter'))
+      return 'mobile';
+    if (name.includes('cloud') || name.includes('aws') || name.includes('azure'))
+      return 'cloud';
+    return 'all';
+  };
 
   // Filter courses based on selected category and search query
   const filteredCourses = courses.filter(course => {
@@ -169,27 +152,32 @@ export default function CoursesDisplayWall() {
       {/* Courses Grid */}
       <section className="py-16 bg-gray-900">
         <div className="container mx-auto px-6">
-          {filteredCourses.length > 0 ? (
+          {isLoading ? (
+            <div className="flex justify-center items-center py-20">
+              <Loader2 size={40} className="animate-spin text-blue-500" />
+              <span className="ml-4 text-xl">Loading courses...</span>
+            </div>
+          ) : error ? (
+            <div className="text-center py-20">
+              <div className="bg-red-900/30 backdrop-blur-sm rounded-xl p-8 max-w-lg mx-auto border border-red-700">
+                <h3 className="text-xl font-semibold mb-3">Error Loading Courses</h3>
+                <p className="text-gray-300 mb-6">{error}</p>
+                <button 
+                  onClick={() => window.location.reload()}
+                  className="px-6 py-2 bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors"
+                >
+                  Retry
+                </button>
+              </div>
+            </div>
+          ) : filteredCourses.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredCourses.map((course, index) => (
                 <div 
-                  key={course.courseId}
+                  key={course.id}
                   className={`bg-gray-800/60 backdrop-blur-sm rounded-xl overflow-hidden border border-gray-700 hover:border-blue-500 transition-all duration-300 transform ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'} hover:-translate-y-2 group`}
                   style={{ transitionDelay: `${index * 100}ms` }}
                 >
-                  {/* Course Image */}
-                  <div className="relative">
-                    <img src={course.image} alt={course.courseName} className="w-full h-48 object-cover" />
-                    <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-gray-900 to-transparent opacity-60"></div>
-                    <div className="absolute top-4 left-4 bg-blue-500 text-white px-2 py-1 rounded text-xs font-medium">
-                      ID: {course.courseId}
-                    </div>
-                    <div className="absolute top-4 right-4 bg-gray-900/80 backdrop-blur-sm px-2.5 py-1.5 rounded-full text-xs font-medium flex items-center">
-                      <Star size={14} className="text-yellow-400 mr-1.5" fill="#FACC15" />
-                      {course.rating} ({course.students.toLocaleString()})
-                    </div>
-                  </div>
-                  
                   {/* Course Content */}
                   <div className="p-6 space-y-4">
                     <div className="flex justify-between items-start">
@@ -198,6 +186,16 @@ export default function CoursesDisplayWall() {
                       </h3>
                       <div className="text-blue-400 font-bold">
                         {course.courseFee}
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center">
+                      <div className="mr-4 bg-gray-900/80 backdrop-blur-sm px-2.5 py-1.5 rounded-full text-xs font-medium flex items-center">
+                        <Star size={14} className="text-yellow-400 mr-1.5" fill="#FACC15" />
+                        {course.rating} ({course.students.toLocaleString()})
+                      </div>
+                      <div className="bg-blue-500 text-white px-2 py-1 rounded text-xs font-medium">
+                        ID: {course.courseId}
                       </div>
                     </div>
                     
