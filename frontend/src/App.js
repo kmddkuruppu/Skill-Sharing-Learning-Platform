@@ -22,7 +22,7 @@ import Dashboard from './Admin/Dashboard'
 // layout wrapper to handle conditional Nav/Footer
 function LayoutWrapper() {
   const location = useLocation();
-  const hideLayout = ['/view', '/skill'].includes(location.pathname.toLowerCase());
+  const hideLayout = ['/view', '/skill' , '/dashboard'].includes(location.pathname.toLowerCase());
 
   return (
     <>
