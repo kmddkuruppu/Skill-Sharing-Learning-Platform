@@ -9,5 +9,4 @@ public class SslpBackendApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(SslpBackendApplication.class, args);
 	}
-
 }

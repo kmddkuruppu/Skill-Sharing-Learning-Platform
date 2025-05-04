@@ -3,11 +3,13 @@ package net.javaguides.sslp.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.List;
+
 @Document(collection = "learnings")
 public class Learning {
 
     @Id
-    private String id; // MongoDB ID (automatically generated)
+    private String id;
 
     private String courseId;
     private String courseName;
@@ -15,18 +17,20 @@ public class Learning {
     private String description;
     private String duration;
     private String jobOpportunities;
+    private List<CourseContent> courseContent;
 
-    // Constructors
-    public Learning() {
-    }
+    // Constructor
+    public Learning() {}
 
-    public Learning(String courseId, String courseName, double courseFee, String description, String duration, String jobOpportunities) {
+    public Learning(String courseId, String courseName, double courseFee, String description,
+                    String duration, String jobOpportunities, List<CourseContent> courseContent) {
         this.courseId = courseId;
         this.courseName = courseName;
         this.courseFee = courseFee;
         this.description = description;
         this.duration = duration;
         this.jobOpportunities = jobOpportunities;
+        this.courseContent = courseContent;
     }
 
     // Getters and Setters
@@ -34,7 +38,7 @@ public class Learning {
         return id;
     }
 
-    public void setId(String id) { // <<<<<< Added this missing method
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -84,5 +88,42 @@ public class Learning {
 
     public void setJobOpportunities(String jobOpportunities) {
         this.jobOpportunities = jobOpportunities;
+    }
+
+    public List<CourseContent> getCourseContent() {
+        return courseContent;
+    }
+
+    public void setCourseContent(List<CourseContent> courseContent) {
+        this.courseContent = courseContent;
+    }
+
+    // Inner static class for course content
+    public static class CourseContent {
+        private String module;
+        private List<String> topics;
+
+        public CourseContent() {}
+
+        public CourseContent(String module, List<String> topics) {
+            this.module = module;
+            this.topics = topics;
+        }
+
+        public String getModule() {
+            return module;
+        }
+
+        public void setModule(String module) {
+            this.module = module;
+        }
+
+        public List<String> getTopics() {
+            return topics;
+        }
+
+        public void setTopics(List<String> topics) {
+            this.topics = topics;
+        }
     }
 }
