@@ -17,12 +17,16 @@ import Community from './User/Community';
 import AddCouse from './Admin/AddCouse';
 import View from './Admin/View';
 import Skill from './Admin/Skill';
+<<<<<<< HEAD
 import Dashboard from './Admin/Dashboard'
+=======
+import Dashboard from './Admin/Dashboard';
+>>>>>>> Learning_Plan_Management
 
 // layout wrapper to handle conditional Nav/Footer
 function LayoutWrapper() {
   const location = useLocation();
-  const hideLayout = ['/view', '/skill'].includes(location.pathname.toLowerCase());
+  const hideLayout = ['/view', '/skill' , '/dashboard'].includes(location.pathname.toLowerCase());
 
   return (
     <>
