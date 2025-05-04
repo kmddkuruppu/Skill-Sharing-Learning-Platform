@@ -17,11 +17,7 @@ import Community from './User/Community';
 import AddCouse from './Admin/AddCouse';
 import View from './Admin/View';
 import Skill from './Admin/Skill';
-<<<<<<< HEAD
-import Dashboard from './Admin/Dashboard'
-=======
 import Dashboard from './Admin/Dashboard';
->>>>>>> Learning_Plan_Management
 
 // layout wrapper to handle conditional Nav/Footer
 function LayoutWrapper() {
