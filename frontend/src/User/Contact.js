@@ -109,7 +109,7 @@ export default function ContactUs() {
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-br from-gray-900/95 via-gray-800/90 to-gray-900/80 z-10"></div>
           <img 
-            src="../assets/images/contact-banner.jpg" 
+            src="../assets/images/banner2.jpg" 
             alt="Contact Us" 
             className="w-full h-full object-cover object-center"
           />
@@ -316,7 +316,7 @@ export default function ContactUs() {
             <div className="bg-gray-900 rounded-xl overflow-hidden w-full h-96">
               {/* Placeholder for map - would be replaced with actual map component */}
               <img 
-                src="/api/placeholder/1200/500" 
+                src="../assets/images/map.jpg" 
                 alt="Office location map" 
                 className="w-full h-full object-cover"
               />
