@@ -109,7 +109,7 @@ export default function ContactUs() {
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-br from-gray-900/95 via-gray-800/90 to-gray-900/80 z-10"></div>
           <img 
-            src="../assets/images/contact-banner.jpg" 
+            src="../assets/images/contact.jpg" 
             alt="Contact Us" 
             className="w-full h-full object-cover object-center"
           />
