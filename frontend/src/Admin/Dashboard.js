@@ -109,7 +109,7 @@ const Card = ({ name, title, icon, link, bgColor, accentColor = "purple" }) => {
                   style={{width: isHovered ? '75%' : '0'}}></span>
           </h3>
           
-          {/* Title with subtle animation */}
+          {/* Title with subtle animations */}
           <p className={`text-gray-300 text-sm font-medium transition-all duration-300 ${colorVariants[accentColor].hoverText} mb-6`}>
             {title}
           </p>
