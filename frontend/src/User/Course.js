@@ -4,7 +4,7 @@ import {
   ChevronRight, Filter, Search, Loader2, 
   BookOpen, Sparkles, ArrowRight, GraduationCap
 } from 'lucide-react';
-import CourseContentModal from '../Components/CourseContentModal'; // Import the CourseContentModal component
+import CourseContentModal from '../Components/CourseContentModal';
 
 export default function CoursesDisplayWall() {
   const [isVisible, setIsVisible] = useState(false);
@@ -14,8 +14,8 @@ export default function CoursesDisplayWall() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [hoveredCourse, setHoveredCourse] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
-  const [selectedCourseId, setSelectedCourseId] = useState(null); // State to track which course is selected
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedCourseId, setSelectedCourseId] = useState(null);
   
   // Categories for filtering
   const categories = [
@@ -105,6 +105,12 @@ export default function CoursesDisplayWall() {
     return 'all';
   };
 
+  // Function to open course content modal
+  const openCourseModal = (courseId) => {
+    setSelectedCourseId(courseId);
+    setModalOpen(true);
+  };
+
   // Filter courses based on selected category and search query
   const filteredCourses = courses.filter(course => {
     const matchesCategory = activeCategory === 'all' || course.category === activeCategory;
@@ -112,18 +118,6 @@ export default function CoursesDisplayWall() {
                           course.description.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
-
-  // Function to handle opening the course content modal
-  const handleViewCourseContent = (courseId) => {
-    setSelectedCourseId(courseId);
-    setIsModalOpen(true);
-  };
-
-  // Function to handle closing the course content modal
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedCourseId(null);
-  };
 
   useEffect(() => {
     // Animation for initial load
@@ -346,10 +340,10 @@ export default function CoursesDisplayWall() {
                     
                     {/* Call to Action Buttons */}
                     <div className="pt-5 space-y-3">
-                      {/* View Course Content Button - Modified to open the modal */}
+                      {/* View Course Content Button */}
                       <button 
                         className="w-full py-3 bg-gray-700/80 backdrop-blur-sm border border-gray-600 rounded-lg hover:bg-gray-600/80 transition-colors flex items-center justify-center font-medium group"
-                        onClick={() => handleViewCourseContent(course.courseId)}
+                        onClick={() => openCourseModal(course.courseId)}
                       >
                         <BookOpen size={18} className="mr-2 text-blue-400" />
                         View Course Content
@@ -480,8 +474,8 @@ export default function CoursesDisplayWall() {
 
       {/* Course Content Modal */}
       <CourseContentModal 
-        isOpen={isModalOpen} 
-        onClose={handleCloseModal} 
+        isOpen={modalOpen} 
+        onClose={() => setModalOpen(false)} 
         courseId={selectedCourseId} 
       />
     </div>
