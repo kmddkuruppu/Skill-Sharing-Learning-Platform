@@ -20,6 +20,7 @@ import View from './Admin/ViewCourse';
 import Skill from './Admin/Skill';
 import Dashboard from './Admin/Dashboard';
 import ViewContact from './Admin/ViewContact';
+import ViewEndrollment from './Admin/ViewEnrollment';
 
 // layout wrapper to handle conditional Nav/Footer
 function LayoutWrapper() {
@@ -47,6 +48,7 @@ function LayoutWrapper() {
         <Route path='/skill' element={<Skill />} />
         <Route path='/dashboard' element={<Dashboard />} />
         <Route path='/viewcontact' element={<ViewContact />} />
+        <Route path='/viewenrollment' element={<ViewEndrollment />} />
       </Routes>
       {!hideLayout && <Footer />}
     </>
