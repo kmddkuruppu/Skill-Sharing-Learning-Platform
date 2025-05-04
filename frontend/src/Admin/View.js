@@ -11,13 +11,15 @@ export default function LearningManagement() {
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
+  const [showDetails, setShowDetails] = useState(null);
   const [formData, setFormData] = useState({
     courseId: "",
     courseName: "",
     courseFee: 0,
     description: "",
     duration: "",
-    jobOpportunities: ""
+    jobOpportunities: "",
+    courseContent: []
   });
   const [notification, setNotification] = useState({ show: false, message: "", type: "" });
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
@@ -25,6 +27,9 @@ export default function LearningManagement() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [successAction, setSuccessAction] = useState("");
   const [successCourseName, setSuccessCourseName] = useState("");
+  const [moduleInput, setModuleInput] = useState("");
+  const [topicInput, setTopicInput] = useState("");
+  const [selectedModuleIndex, setSelectedModuleIndex] = useState(null);
 
   const API_URL = "http://localhost:8080/api/learnings";
 
@@ -140,10 +145,16 @@ export default function LearningManagement() {
       courseFee: learning.courseFee,
       description: learning.description,
       duration: learning.duration,
-      jobOpportunities: learning.jobOpportunities
+      jobOpportunities: learning.jobOpportunities,
+      courseContent: learning.courseContent || []
     });
     setIsEditing(true);
     setIsAdding(false);
+  };
+
+  // Handle view details
+  const toggleDetails = (id) => {
+    setShowDetails(showDetails === id ? null : id);
   };
 
   // Handle form input changes
@@ -155,6 +166,62 @@ export default function LearningManagement() {
     });
   };
 
+  // Add new module to course content
+  const addModule = () => {
+    if (!moduleInput.trim()) return;
+    
+    setFormData({
+      ...formData,
+      courseContent: [
+        ...formData.courseContent || [],
+        { module: moduleInput, topics: [] }
+      ]
+    });
+    setModuleInput("");
+  };
+
+  // Add new topic to a module
+  const addTopic = () => {
+    if (selectedModuleIndex === null || !topicInput.trim()) return;
+    
+    const updatedContent = [...formData.courseContent];
+    updatedContent[selectedModuleIndex].topics = [
+      ...updatedContent[selectedModuleIndex].topics || [],
+      topicInput
+    ];
+    
+    setFormData({
+      ...formData,
+      courseContent: updatedContent
+    });
+    setTopicInput("");
+  };
+
+  // Remove module
+  const removeModule = (indexToRemove) => {
+    setFormData({
+      ...formData,
+      courseContent: formData.courseContent.filter((_, index) => index !== indexToRemove)
+    });
+    
+    if (selectedModuleIndex === indexToRemove) {
+      setSelectedModuleIndex(null);
+    } else if (selectedModuleIndex > indexToRemove) {
+      setSelectedModuleIndex(selectedModuleIndex - 1);
+    }
+  };
+
+  // Remove topic
+  const removeTopic = (moduleIndex, topicIndex) => {
+    const updatedContent = [...formData.courseContent];
+    updatedContent[moduleIndex].topics = updatedContent[moduleIndex].topics.filter((_, index) => index !== topicIndex);
+    
+    setFormData({
+      ...formData,
+      courseContent: updatedContent
+    });
+  };
+
   // Reset form
   const resetForm = () => {
     setFormData({
@@ -163,8 +230,12 @@ export default function LearningManagement() {
       courseFee: 0,
       description: "",
       duration: "",
-      jobOpportunities: ""
+      jobOpportunities: "",
+      courseContent: []
     });
+    setModuleInput("");
+    setTopicInput("");
+    setSelectedModuleIndex(null);
   };
 
   // Handle sorting
@@ -200,9 +271,9 @@ export default function LearningManagement() {
 
   // Filter learnings based on search term
   const filteredLearnings = sortedLearnings.filter(learning => 
-    learning.courseName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    learning.courseId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    learning.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    learning.courseName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    learning.courseId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    learning.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (learning.jobOpportunities && learning.jobOpportunities.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
@@ -360,6 +431,107 @@ export default function LearningManagement() {
               />
             </div>
             
+            {/* Course Content Section */}
+            <div className="md:col-span-2 mt-4">
+              <h3 className="text-lg font-medium mb-3 text-gray-800">Course Content</h3>
+              
+              {/* Add Module Section */}
+              <div className="mb-4 p-4 bg-white border rounded-lg">
+                <div className="flex gap-2 mb-3">
+                  <input
+                    type="text"
+                    placeholder="Enter module name"
+                    value={moduleInput}
+                    onChange={(e) => setModuleInput(e.target.value)}
+                    className="flex-1 p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button
+                    onClick={addModule}
+                    className="bg-blue-600 text-white px-3 py-2 rounded hover:bg-blue-700"
+                  >
+                    Add Module
+                  </button>
+                </div>
+                
+                {/* List of Modules */}
+                {formData.courseContent && formData.courseContent.length > 0 ? (
+                  <div className="space-y-3">
+                    {formData.courseContent.map((content, moduleIndex) => (
+                      <div key={moduleIndex} className="p-3 bg-gray-50 rounded border">
+                        <div className="flex justify-between items-center mb-2">
+                          <div className="font-medium">Module: {content.module}</div>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => setSelectedModuleIndex(moduleIndex)}
+                              className={`px-3 py-1 text-sm rounded ${
+                                selectedModuleIndex === moduleIndex
+                                  ? "bg-blue-600 text-white"
+                                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                              }`}
+                            >
+                              Add Topics
+                            </button>
+                            <button
+                              onClick={() => removeModule(moduleIndex)}
+                              className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        </div>
+                        
+                        {/* Topics List */}
+                        {content.topics && content.topics.length > 0 && (
+                          <div className="ml-4 mt-2">
+                            <p className="text-sm text-gray-600 mb-1">Topics:</p>
+                            <ul className="list-disc list-inside space-y-1">
+                              {content.topics.map((topic, topicIndex) => (
+                                <li key={topicIndex} className="flex items-center justify-between text-sm">
+                                  <span>{topic}</span>
+                                  <button
+                                    onClick={() => removeTopic(moduleIndex, topicIndex)}
+                                    className="text-red-600 hover:text-red-800"
+                                  >
+                                    <Trash2 size={14} />
+                                  </button>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 text-sm italic">No course content added yet.</p>
+                )}
+              </div>
+              
+              {/* Add Topics Section */}
+              {selectedModuleIndex !== null && (
+                <div className="mb-4 p-4 bg-white border rounded-lg">
+                  <h4 className="text-md font-medium mb-2">
+                    Adding topics to: {formData.courseContent[selectedModuleIndex].module}
+                  </h4>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Enter topic"
+                      value={topicInput}
+                      onChange={(e) => setTopicInput(e.target.value)}
+                      className="flex-1 p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <button
+                      onClick={addTopic}
+                      className="bg-blue-600 text-white px-3 py-2 rounded hover:bg-blue-700"
+                    >
+                      Add Topic
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+            
             <div className="md:col-span-2 flex gap-4 mt-4">
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -439,12 +611,9 @@ export default function LearningManagement() {
                       )}
                     </div>
                   </th>
-                  <th onClick={() => requestSort('jobOpportunities')} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     <div className="flex items-center">
-                      Job Opportunities
-                      {sortConfig.key === 'jobOpportunities' && (
-                        sortConfig.direction === 'ascending' ? <ChevronUp size={16} /> : <ChevronDown size={16} />
-                      )}
+                      Overview
                     </div>
                   </th>
                   <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -454,53 +623,103 @@ export default function LearningManagement() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredLearnings.map((learning) => (
-                  <motion.tr 
-                    key={learning.id} 
-                    className="hover:bg-gray-50"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <td className="px-4 py-4 text-sm font-medium text-gray-900">
-                      {learning.courseId}
-                    </td>
-                    <td className="px-4 py-4 text-sm text-gray-800">
-                      {learning.courseName}
-                    </td>
-                    <td className="px-4 py-4 text-sm text-gray-800">
-                      LKR.{learning.courseFee.toFixed(2)}
-                    </td>
-                    <td className="px-4 py-4 text-sm text-gray-800">
-                      {learning.duration}
-                    </td>
-                    <td className="px-4 py-4 text-sm text-gray-800">
-                      <div className="max-w-xs overflow-hidden" title={learning.jobOpportunities}>
-                        {truncateText(learning.jobOpportunities, 100)}
-                      </div>
-                    </td>
-                    <td className="px-4 py-4 text-sm text-gray-800 text-right">
-                      <div className="inline-flex items-center gap-3">
-                        <motion.button
-                          whileHover={{ scale: 1.2 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={() => handleEdit(learning)}
-                          className="text-blue-600 hover:text-blue-800"
-                          title="Edit course"
+                  <>
+                    <motion.tr 
+                      key={learning.id} 
+                      className="hover:bg-gray-50"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <td className="px-4 py-4 text-sm font-medium text-gray-900">
+                        {learning.courseId}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-800">
+                        {learning.courseName}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-800">
+                        LKR.{learning.courseFee?.toFixed(2)}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-800">
+                        {learning.duration}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-800">
+                        <button
+                          onClick={() => toggleDetails(learning.id)}
+                          className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs hover:bg-blue-200"
                         >
-                          <Edit size={20} />
-                        </motion.button>
-                        <motion.button
-                          whileHover={{ scale: 1.2 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={() => deleteLearning(learning.id, learning.courseName)}
-                          className="text-red-600 hover:text-red-800"
-                          title="Delete course"
-                        >
-                          <Trash2 size={20} />
-                        </motion.button>
-                      </div>
-                    </td>
-                  </motion.tr>
+                          {showDetails === learning.id ? "Hide Details" : "View Details"}
+                        </button>
+                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-800 text-right">
+                        <div className="inline-flex items-center gap-3">
+                          <motion.button
+                            whileHover={{ scale: 1.2 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => handleEdit(learning)}
+                            className="text-blue-600 hover:text-blue-800"
+                            title="Edit course"
+                          >
+                            <Edit size={20} />
+                          </motion.button>
+                          <motion.button
+                            whileHover={{ scale: 1.2 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => deleteLearning(learning.id, learning.courseName)}
+                            className="text-red-600 hover:text-red-800"
+                            title="Delete course"
+                          >
+                            <Trash2 size={20} />
+                          </motion.button>
+                        </div>
+                      </td>
+                    </motion.tr>
+                    
+                    {/* Expanded Details Row */}
+                    {showDetails === learning.id && (
+                      <tr className="bg-gray-50">
+                        <td colSpan="6" className="px-4 py-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <h4 className="font-medium mb-2">Description:</h4>
+                              <p className="text-sm text-gray-700 whitespace-pre-line mb-4">
+                                {learning.description || "No description available."}
+                              </p>
+                              
+                              <h4 className="font-medium mb-2">Job Opportunities:</h4>
+                              <p className="text-sm text-gray-700 whitespace-pre-line">
+                                {learning.jobOpportunities || "No job opportunities listed."}
+                              </p>
+                            </div>
+                            
+                            <div>
+                              <h4 className="font-medium mb-2">Course Content:</h4>
+                              {learning.courseContent && learning.courseContent.length > 0 ? (
+                                <div className="space-y-3">
+                                  {learning.courseContent.map((content, index) => (
+                                    <div key={index} className="border rounded p-3">
+                                      <h5 className="font-medium text-blue-700">{content.module}</h5>
+                                      {content.topics && content.topics.length > 0 ? (
+                                        <ul className="list-disc list-inside mt-1 ml-2">
+                                          {content.topics.map((topic, tIndex) => (
+                                            <li key={tIndex} className="text-sm text-gray-700">{topic}</li>
+                                          ))}
+                                        </ul>
+                                      ) : (
+                                        <p className="text-sm text-gray-500 italic mt-1">No topics listed.</p>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <p className="text-sm text-gray-500 italic">No course content available.</p>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </>
                 ))}
               </tbody>
             </table>
