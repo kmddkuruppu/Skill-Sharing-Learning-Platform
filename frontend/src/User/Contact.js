@@ -4,6 +4,8 @@ import { Mail, MapPin, Phone, Send, MessageSquare, Clock, ArrowRight, CheckCircl
 export default function ContactUs() {
   const [isVisible, setIsVisible] = useState(false);
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -23,10 +25,25 @@ export default function ContactUs() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Simulate form submission
-    setTimeout(() => {
+    setIsSubmitting(true);
+    setError(null);
+    
+    try {
+      const response = await fetch('http://localhost:8080/api/contacts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Server responded with status: ${response.status}`);
+      }
+      
+      await response.json(); // Parse the response if needed
       setFormSubmitted(true);
       setFormData({
         name: '',
@@ -34,7 +51,12 @@ export default function ContactUs() {
         subject: '',
         message: ''
       });
-    }, 1000);
+    } catch (err) {
+      console.error('Error submitting contact form:', err);
+      setError('Failed to submit the form. Please try again later.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const contactInfo = [
@@ -216,12 +238,19 @@ export default function ContactUs() {
                     ></textarea>
                   </div>
                   
+                  {error && (
+                    <div className="bg-red-900/30 backdrop-blur-sm border border-red-500 rounded-lg p-4 text-red-300">
+                      {error}
+                    </div>
+                  )}
+                  
                   <div>
                     <button 
                       type="submit" 
-                      className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full hover:from-blue-600 hover:to-purple-700 transition-all flex items-center justify-center font-medium shadow-lg shadow-blue-500/20"
+                      disabled={isSubmitting}
+                      className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full hover:from-blue-600 hover:to-purple-700 transition-all flex items-center justify-center font-medium shadow-lg shadow-blue-500/20 disabled:opacity-70 disabled:cursor-not-allowed"
                     >
-                      Send Message <Send size={18} className="ml-2" />
+                      {isSubmitting ? 'Sending...' : 'Send Message'} <Send size={18} className="ml-2" />
                     </button>
                   </div>
                 </form>
