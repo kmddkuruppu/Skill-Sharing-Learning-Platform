@@ -4,9 +4,11 @@ import {
   ChevronRight, Filter, Search, Loader2, 
   BookOpen, Sparkles, ArrowRight, GraduationCap
 } from 'lucide-react';
-import CourseContentModal from '../Components/CourseContentModal'; // Import the CourseContentModal component
+import CourseContentModal from '../Components/CourseContentModal';
+import { useNavigate } from 'react-router-dom'; // Add this import for navigation
 
 export default function CoursesDisplayWall() {
+  const navigate = useNavigate(); // Initialize the navigate function
   const [isVisible, setIsVisible] = useState(false);
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -14,8 +16,8 @@ export default function CoursesDisplayWall() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [hoveredCourse, setHoveredCourse] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
-  const [selectedCourseId, setSelectedCourseId] = useState(null); // State to track which course is selected
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedCourseId, setSelectedCourseId] = useState(null);
   
   // Categories for filtering
   const categories = [
@@ -27,6 +29,12 @@ export default function CoursesDisplayWall() {
     { id: 'mobile', name: 'Mobile Dev', icon: <Sparkles size={16} className="mr-1.5" /> },
     { id: 'cloud', name: 'Cloud Computing', icon: <Sparkles size={16} className="mr-1.5" /> }
   ];
+
+  // Function to handle enrollment button click
+  const handleEnrollNow = (courseId) => {
+    // Navigate to the enrollment page with the course ID as a parameter
+    navigate(`/enrollment`);
+  };
 
   // Fetch courses from the backend API
   useEffect(() => {
@@ -357,7 +365,10 @@ export default function CoursesDisplayWall() {
                       </button>
                       
                       {/* Enroll Now Button */}
-                      <button className={`w-full py-3 bg-gradient-to-r ${course.colorClass} rounded-lg transition-all shadow-lg hover:shadow-blue-500/20 flex items-center justify-center font-medium group overflow-hidden relative`}>
+                      <button 
+                        className={`w-full py-3 bg-gradient-to-r ${course.colorClass} rounded-lg transition-all shadow-lg hover:shadow-blue-500/20 flex items-center justify-center font-medium group overflow-hidden relative`}
+                        onClick={() => handleEnrollNow(course.courseId)}
+                      >
                         <span className="absolute inset-0 bg-white/20 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300"></span>
                         <span className="relative flex items-center">
                           Enroll Now 
