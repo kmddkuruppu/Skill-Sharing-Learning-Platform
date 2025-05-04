@@ -15,7 +15,7 @@ import Community from './User/Community';
 
 // import Admin pages
 import AddCouse from './Admin/AddCouse';
-import View from './Admin/View';
+import View from './Admin/ViewCourse';
 import Skill from './Admin/Skill';
 import Dashboard from './Admin/Dashboard';
 import ViewContact from './Admin/ViewContact';
@@ -23,7 +23,7 @@ import ViewContact from './Admin/ViewContact';
 // layout wrapper to handle conditional Nav/Footer
 function LayoutWrapper() {
   const location = useLocation();
-  const hideLayout = ['/view', '/skill' , '/dashboard' , '/viewcontact'].includes(location.pathname.toLowerCase());
+  const hideLayout = ['/viewcourse', '/skill' , '/dashboard' , '/viewcontact'].includes(location.pathname.toLowerCase());
 
   return (
     <>
