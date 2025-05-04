@@ -5,10 +5,10 @@ import {
   BookOpen, Sparkles, ArrowRight, GraduationCap
 } from 'lucide-react';
 import CourseContentModal from '../Components/CourseContentModal';
-import { useNavigate } from 'react-router-dom'; // Add this import for navigation
+import { useNavigate } from 'react-router-dom';
 
 export default function CoursesDisplayWall() {
-  const navigate = useNavigate(); // Initialize the navigate function
+  const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(false);
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -30,10 +30,10 @@ export default function CoursesDisplayWall() {
     { id: 'cloud', name: 'Cloud Computing', icon: <Sparkles size={16} className="mr-1.5" /> }
   ];
 
-  // Function to handle enrollment button click
-  const handleEnrollNow = (courseId) => {
-    // Navigate to the enrollment page with the course ID as a parameter
-    navigate(`/enrollment`);
+  // Function to handle enrollment button click - UPDATED
+  const handleEnrollNow = (course) => {
+    // Navigate to the enrollment page with the course data as URL parameters
+    navigate(`/enrollment?courseId=${course.courseId}&courseName=${encodeURIComponent(course.courseName)}`);
   };
 
   // Fetch courses from the backend API
@@ -74,6 +74,54 @@ export default function CoursesDisplayWall() {
       } catch (err) {
         setError(`Failed to fetch courses: ${err.message}`);
         console.error("Error fetching courses:", err);
+        
+        // For demo purposes, load mock data if the API call fails
+        const mockCourses = [
+          {
+            id: "1",
+            courseId: "CS101",
+            courseName: "Introduction to Web Development",
+            courseFee: "$299",
+            description: "Learn the fundamentals of web development including HTML, CSS and JavaScript.",
+            duration: "8 weeks",
+            jobOpportunities: ["Frontend Developer", "Web Designer", "UI Developer"],
+            category: "frontend",
+            rating: 4.8,
+            students: 2350,
+            instructor: "John Smith",
+            colorClass: getRandomColorClass()
+          },
+          {
+            id: "2",
+            courseId: "CS102",
+            courseName: "React.js Fundamentals",
+            courseFee: "$349",
+            description: "Build modern user interfaces with React, the popular JavaScript library.",
+            duration: "10 weeks",
+            jobOpportunities: ["React Developer", "Frontend Engineer", "JavaScript Developer"],
+            category: "frontend",
+            rating: 4.9,
+            students: 1890,
+            instructor: "Sarah Johnson",
+            colorClass: getRandomColorClass()
+          },
+          {
+            id: "3",
+            courseId: "CS103",
+            courseName: "Backend Development with Node.js",
+            courseFee: "$399",
+            description: "Create scalable server-side applications using Node.js and Express.",
+            duration: "12 weeks",
+            jobOpportunities: ["Backend Developer", "Node.js Developer", "Full Stack Developer"],
+            category: "backend",
+            rating: 4.7,
+            students: 1540,
+            instructor: "Michael Chen",
+            colorClass: getRandomColorClass()
+          }
+        ];
+        
+        setCourses(mockCourses);
       } finally {
         setIsLoading(false);
       }
@@ -364,10 +412,10 @@ export default function CoursesDisplayWall() {
                         <ChevronRight size={16} className="ml-1 transition-transform group-hover:translate-x-1" />
                       </button>
                       
-                      {/* Enroll Now Button */}
+                      {/* Enroll Now Button - UPDATED to pass the entire course object */}
                       <button 
                         className={`w-full py-3 bg-gradient-to-r ${course.colorClass} rounded-lg transition-all shadow-lg hover:shadow-blue-500/20 flex items-center justify-center font-medium group overflow-hidden relative`}
-                        onClick={() => handleEnrollNow(course.courseId)}
+                        onClick={() => handleEnrollNow(course)}
                       >
                         <span className="absolute inset-0 bg-white/20 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300"></span>
                         <span className="relative flex items-center">

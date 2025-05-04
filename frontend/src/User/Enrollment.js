@@ -3,55 +3,31 @@ import {
   User, Mail, CreditCard, Phone, BookOpen, 
   GraduationCap, ArrowRight, Check, Loader2
 } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 
 export default function CourseEnrollmentForm() {
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     nic: '',
     phoneNumber: '',
-    courseId: '',
-    courseName: '',
+    courseId: queryParams.get('courseId') || '',
+    courseName: queryParams.get('courseName') || '',
     learningMode: 'online'
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [coursesList, setCoursesList] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [isVisible, setIsVisible] = useState(false);
   
   // Animation effect
   useEffect(() => {
     setIsVisible(true);
-    
-    // Mock API call to fetch courses - replace with your actual API
-    const fetchCourses = async () => {
-      try {
-        setIsLoading(true);
-        // Replace with your actual API endpoint
-        // const response = await fetch('http://localhost:8080/api/learnings');
-        
-        // For demo, we'll just set some mock data
-        setTimeout(() => {
-          setCoursesList([
-            { courseId: 'CS101', courseName: 'Introduction to Web Development' },
-            { courseId: 'CS102', courseName: 'React.js Fundamentals' },
-            { courseId: 'CS103', courseName: 'Backend Development with Node.js' },
-            { courseId: 'CS104', courseName: 'UI/UX Design Principles' },
-            { courseId: 'CS105', courseName: 'Data Science Fundamentals' },
-            { courseId: 'CS106', courseName: 'Mobile App Development' },
-          ]);
-          setIsLoading(false);
-        }, 800);
-      } catch (err) {
-        console.error("Error fetching courses:", err);
-        setIsLoading(false);
-      }
-    };
-    
-    fetchCourses();
   }, []);
   
   // Handle input change
@@ -68,17 +44,6 @@ export default function CourseEnrollmentForm() {
         ...prev,
         [name]: null
       }));
-    }
-    
-    // Auto-fill course name when courseId is selected
-    if (name === 'courseId') {
-      const selectedCourse = coursesList.find(course => course.courseId === value);
-      if (selectedCourse) {
-        setFormData(prev => ({
-          ...prev,
-          courseName: selectedCourse.courseName
-        }));
-      }
     }
   };
   
@@ -102,7 +67,7 @@ export default function CourseEnrollmentForm() {
       newErrors.phoneNumber = 'Enter a valid phone number';
     }
     
-    if (!formData.courseId) newErrors.courseId = 'Please select a course';
+    if (!formData.courseId) newErrors.courseId = 'Course ID is missing';
     
     if (!formData.learningMode) newErrors.learningMode = 'Please select a learning mode';
     
@@ -146,8 +111,8 @@ export default function CourseEnrollmentForm() {
           email: '',
           nic: '',
           phoneNumber: '',
-          courseId: '',
-          courseName: '',
+          courseId: queryParams.get('courseId') || '',
+          courseName: queryParams.get('courseName') || '',
           learningMode: 'online'
         });
         setIsSuccess(false);
@@ -177,9 +142,16 @@ export default function CourseEnrollmentForm() {
             </span>
           </h1>
           
-          <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            Complete the form below to enroll in your selected course and begin your learning journey
+          <p className="text-xl text-gray-300 mb-4 max-w-2xl mx-auto">
+            Complete the form below to enroll in your selected course
           </p>
+          
+          {formData.courseName && (
+            <div className="bg-gradient-to-r from-blue-900/40 to-purple-900/40 rounded-lg py-2 px-4 inline-flex items-center mt-2">
+              <BookOpen size={18} className="text-blue-400 mr-2" />
+              <span className="text-lg font-medium">{formData.courseName}</span>
+            </div>
+          )}
         </header>
         
         {/* Form Card */}
@@ -200,16 +172,16 @@ export default function CourseEnrollmentForm() {
                 </div>
                 <h3 className="text-2xl font-bold mb-4 text-white">Enrollment Successful!</h3>
                 <p className="text-gray-300 mb-8">
-                  Thank you for enrolling. You will receive a confirmation email shortly with further instructions.
+                  Thank you for enrolling in <span className="font-medium text-blue-400">{formData.courseName}</span>. You will receive a confirmation email shortly with further instructions.
                 </p>
                 <div className="inline-block">
                   <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-0.5 rounded-lg">
                     <button 
                       type="button"
-                      onClick={() => window.location.reload()}
+                      onClick={() => window.location.href = "/courses"}  // Navigate back to courses
                       className="px-6 py-2.5 bg-gray-900 rounded-md hover:bg-gray-800 transition-colors"
                     >
-                      Enroll in Another Course
+                      Browse More Courses
                     </button>
                   </div>
                 </div>
@@ -321,50 +293,24 @@ export default function CourseEnrollmentForm() {
                     )}
                   </div>
 
-                  {/* Course ID */}
+                  {/* Course ID - Read Only */}
                   <div className="col-span-1">
                     <label className="block text-sm font-medium text-gray-300 mb-2 ml-1">
                       Course ID
                     </label>
-                    <div className="relative group">
-                      <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg opacity-30 group-focus-within:opacity-100 transition-all duration-300 blur"></div>
-                      <div className="relative">
-                        <BookOpen size={18} className="absolute left-3 top-3 text-gray-400" />
-                        <select
-                          name="courseId"
-                          value={formData.courseId}
-                          onChange={handleChange}
-                          className={`w-full py-3 pl-10 pr-3 bg-gray-900/90 border ${
-                            errors.courseId ? 'border-red-500' : 'border-gray-700'
-                          } rounded-lg focus:outline-none focus:border-blue-400 focus:ring-0 text-white transition-colors appearance-none`}
-                          disabled={isLoading}
-                        >
-                          <option value="">Select Course ID</option>
-                          {coursesList.map((course) => (
-                            <option key={course.courseId} value={course.courseId}>
-                              {course.courseId} - {course.courseName}
-                            </option>
-                          ))}
-                        </select>
-                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                          <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                          </svg>
-                        </div>
-                      </div>
+                    <div className="relative">
+                      <BookOpen size={18} className="absolute left-3 top-3 text-blue-400" />
+                      <input
+                        type="text"
+                        name="courseId"
+                        value={formData.courseId}
+                        readOnly
+                        className="w-full py-3 pl-10 pr-3 bg-gray-800/60 border border-gray-700 rounded-lg text-white cursor-not-allowed"
+                      />
                     </div>
-                    {errors.courseId && (
-                      <p className="text-red-500 text-xs mt-1 ml-1">{errors.courseId}</p>
-                    )}
-                    {isLoading && (
-                      <div className="flex items-center mt-1 ml-1">
-                        <Loader2 size={12} className="animate-spin mr-1 text-blue-400" />
-                        <p className="text-xs text-blue-400">Loading courses...</p>
-                      </div>
-                    )}
                   </div>
 
-                  {/* Course Name (auto-filled) */}
+                  {/* Course Name - Read Only */}
                   <div className="col-span-1">
                     <label className="block text-sm font-medium text-gray-300 mb-2 ml-1">
                       Course Name
@@ -375,8 +321,7 @@ export default function CourseEnrollmentForm() {
                         name="courseName"
                         value={formData.courseName}
                         readOnly
-                        className="w-full py-3 pl-3 pr-3 bg-gray-800/60 border border-gray-700 rounded-lg text-gray-400 focus:outline-none cursor-not-allowed"
-                        placeholder="Auto-filled from Course ID"
+                        className="w-full py-3 pl-3 pr-3 bg-gray-800/60 border border-gray-700 rounded-lg text-white cursor-not-allowed"
                       />
                     </div>
                   </div>
@@ -436,11 +381,11 @@ export default function CourseEnrollmentForm() {
                       {isSubmitting ? (
                         <>
                           <Loader2 size={20} className="animate-spin mr-2" />
-                          Processing...
+                          Processing Enrollment...
                         </>
                       ) : (
                         <>
-                          Submit Enrollment
+                          Complete Enrollment
                           <ArrowRight size={18} className="ml-2 transform group-hover:translate-x-1 transition-transform" />
                         </>
                       )}
