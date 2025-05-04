@@ -316,7 +316,7 @@ export default function ContactUs() {
             <div className="bg-gray-900 rounded-xl overflow-hidden w-full h-96">
               {/* Placeholder for map - would be replaced with actual map component */}
               <img 
-                src="/api/placeholder/1200/500" 
+                src="../assets/images/map.jpg" 
                 alt="Office location map" 
                 className="w-full h-full object-cover"
               />
