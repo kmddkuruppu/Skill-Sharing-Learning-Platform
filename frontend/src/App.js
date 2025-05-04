@@ -18,12 +18,12 @@ import AddCouse from './Admin/AddCouse';
 import View from './Admin/View';
 import Skill from './Admin/Skill';
 import Dashboard from './Admin/Dashboard';
-import Contact from './User/Contact';
+import ViewContact from './Admin/ViewContact';
 
 // layout wrapper to handle conditional Nav/Footer
 function LayoutWrapper() {
   const location = useLocation();
-  const hideLayout = ['/view', '/skill' , '/dashboard'].includes(location.pathname.toLowerCase());
+  const hideLayout = ['/view', '/skill' , '/dashboard' , '/viewcontact'].includes(location.pathname.toLowerCase());
 
   return (
     <>
@@ -44,7 +44,7 @@ function LayoutWrapper() {
         <Route path='/view' element={<View />} />
         <Route path='/skill' element={<Skill />} />
         <Route path='/dashboard' element={<Dashboard />} />
-        <Route path='/contact' element={<Contact />} />
+        <Route path='/viewcontact' element={<ViewContact />} />
       </Routes>
       {!hideLayout && <Footer />}
     </>
