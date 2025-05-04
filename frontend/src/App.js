@@ -17,6 +17,7 @@ import Community from './User/Community';
 import AddCouse from './Admin/AddCouse';
 import View from './Admin/View';
 import Skill from './Admin/Skill';
+import Dashboard from './Admin/Dashboard'
 
 // layout wrapper to handle conditional Nav/Footer
 function LayoutWrapper() {
@@ -41,6 +42,7 @@ function LayoutWrapper() {
         <Route path='/addcourse' element={<AddCouse />} />
         <Route path='/view' element={<View />} />
         <Route path='/skill' element={<Skill />} />
+        <Route path='/dashboard' element={<Dashboard />} />
       </Routes>
       {!hideLayout && <Footer />}
     </>
