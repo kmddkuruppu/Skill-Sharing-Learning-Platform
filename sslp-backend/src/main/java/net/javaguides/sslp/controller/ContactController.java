@@ -9,7 +9,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/contacts")
-@CrossOrigin(origins = "*") // Enable CORS for frontend
+@CrossOrigin(origins = "*")
 public class ContactController {
 
     @Autowired
