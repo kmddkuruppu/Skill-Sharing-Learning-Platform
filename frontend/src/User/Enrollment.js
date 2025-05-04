@@ -1,18 +1,22 @@
 import { useState, useEffect } from 'react';
 import { 
   User, Mail, CreditCard, Phone, BookOpen, 
-  GraduationCap, ArrowRight, Check, Loader2
+  GraduationCap, ArrowRight, Check, Loader2, AlertCircle
 } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+
+// Backend API base URL - adjust this to match your environment
+const API_BASE_URL = 'http://localhost:8080';
 
 export default function CourseEnrollmentForm() {
   const location = useLocation();
+  const navigate = useNavigate();
   const queryParams = new URLSearchParams(location.search);
   
   const [formData, setFormData] = useState({
     fullName: '',
-    email: '',
-    nic: '',
+    emailAddress: '', // Changed from 'email' to match backend field
+    nicNumber: '',    // Changed from 'nic' to match backend field
     phoneNumber: '',
     courseId: queryParams.get('courseId') || '',
     courseName: queryParams.get('courseName') || '',
@@ -21,7 +25,7 @@ export default function CourseEnrollmentForm() {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [apiError, setApiError] = useState(null);
   const [errors, setErrors] = useState({});
   const [isVisible, setIsVisible] = useState(false);
   
@@ -53,13 +57,13 @@ export default function CourseEnrollmentForm() {
     
     if (!formData.fullName.trim()) newErrors.fullName = 'Full name is required';
     
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid';
+    if (!formData.emailAddress.trim()) {
+      newErrors.emailAddress = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.emailAddress)) {
+      newErrors.emailAddress = 'Email is invalid';
     }
     
-    if (!formData.nic.trim()) newErrors.nic = 'NIC is required';
+    if (!formData.nicNumber.trim()) newErrors.nicNumber = 'NIC is required';
     
     if (!formData.phoneNumber.trim()) {
       newErrors.phoneNumber = 'Phone number is required';
@@ -78,6 +82,9 @@ export default function CourseEnrollmentForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Reset any previous errors
+    setApiError(null);
+    
     // Validate form
     const newErrors = validateForm();
     if (Object.keys(newErrors).length > 0) {
@@ -89,37 +96,31 @@ export default function CourseEnrollmentForm() {
     setIsSubmitting(true);
     
     try {
-      // Mock API call - replace with your actual API endpoint
-      // await fetch('http://localhost:8080/api/enrollments', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify(formData)
-      // });
+      // Call the backend API
+      const response = await fetch(`${API_BASE_URL}/api/enrollments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      });
       
-      // For demo purposes, simulate a delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.message || `Error: ${response.status}`);
+      }
       
       // Show success message
       setIsSuccess(true);
       
-      // Reset form after success
+      // Reset form after 3 seconds and navigate back to course listing
       setTimeout(() => {
-        setFormData({
-          fullName: '',
-          email: '',
-          nic: '',
-          phoneNumber: '',
-          courseId: queryParams.get('courseId') || '',
-          courseName: queryParams.get('courseName') || '',
-          learningMode: 'online'
-        });
-        setIsSuccess(false);
+        navigate('/courses');
       }, 3000);
       
     } catch (error) {
-      console.error('Error submitting form:', error);
+      console.error('Error submitting enrollment:', error);
+      setApiError(error.message || 'Failed to submit enrollment. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -163,6 +164,14 @@ export default function CourseEnrollmentForm() {
           {/* Top Gradient Bar */}
           <div className="h-2 w-full bg-gradient-to-r from-blue-500 to-purple-600"></div>
           
+          {/* API Error Message */}
+          {apiError && (
+            <div className="mx-8 mt-6 p-4 bg-red-500/20 border border-red-500/50 rounded-lg flex items-start">
+              <AlertCircle size={20} className="text-red-400 mr-3 mt-0.5 flex-shrink-0" />
+              <p className="text-red-200 text-sm">{apiError}</p>
+            </div>
+          )}
+          
           {/* Form Content */}
           <div className="p-8">
             {isSuccess ? (
@@ -178,7 +187,7 @@ export default function CourseEnrollmentForm() {
                   <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-0.5 rounded-lg">
                     <button 
                       type="button"
-                      onClick={() => window.location.href = "/courses"}  // Navigate back to courses
+                      onClick={() => navigate('/courses')}
                       className="px-6 py-2.5 bg-gray-900 rounded-md hover:bg-gray-800 transition-colors"
                     >
                       Browse More Courses
@@ -226,18 +235,18 @@ export default function CourseEnrollmentForm() {
                         <Mail size={18} className="absolute left-3 text-gray-400" />
                         <input
                           type="email"
-                          name="email"
-                          value={formData.email}
+                          name="emailAddress"
+                          value={formData.emailAddress}
                           onChange={handleChange}
                           className={`w-full py-3 pl-10 pr-3 bg-gray-900/90 border ${
-                            errors.email ? 'border-red-500' : 'border-gray-700'
+                            errors.emailAddress ? 'border-red-500' : 'border-gray-700'
                           } rounded-lg focus:outline-none focus:border-blue-400 focus:ring-0 text-white transition-colors`}
                           placeholder="Enter your email address"
                         />
                       </div>
                     </div>
-                    {errors.email && (
-                      <p className="text-red-500 text-xs mt-1 ml-1">{errors.email}</p>
+                    {errors.emailAddress && (
+                      <p className="text-red-500 text-xs mt-1 ml-1">{errors.emailAddress}</p>
                     )}
                   </div>
 
@@ -252,18 +261,18 @@ export default function CourseEnrollmentForm() {
                         <CreditCard size={18} className="absolute left-3 text-gray-400" />
                         <input
                           type="text"
-                          name="nic"
-                          value={formData.nic}
+                          name="nicNumber"
+                          value={formData.nicNumber}
                           onChange={handleChange}
                           className={`w-full py-3 pl-10 pr-3 bg-gray-900/90 border ${
-                            errors.nic ? 'border-red-500' : 'border-gray-700'
+                            errors.nicNumber ? 'border-red-500' : 'border-gray-700'
                           } rounded-lg focus:outline-none focus:border-blue-400 focus:ring-0 text-white transition-colors`}
                           placeholder="Enter your NIC number"
                         />
                       </div>
                     </div>
-                    {errors.nic && (
-                      <p className="text-red-500 text-xs mt-1 ml-1">{errors.nic}</p>
+                    {errors.nicNumber && (
+                      <p className="text-red-500 text-xs mt-1 ml-1">{errors.nicNumber}</p>
                     )}
                   </div>
 
