@@ -187,7 +187,7 @@ export default function CourseEnrollmentForm() {
                   <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-0.5 rounded-lg">
                     <button 
                       type="button"
-                      onClick={() => navigate('/courses')}
+                      onClick={() => navigate('/course')}
                       className="px-6 py-2.5 bg-gray-900 rounded-md hover:bg-gray-800 transition-colors"
                     >
                       Browse More Courses
@@ -343,7 +343,7 @@ export default function CourseEnrollmentForm() {
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       {[
                         { id: 'online', label: 'Online' },
-                        { id: 'in-person', label: 'In-Person' },
+                        { id: 'physical', label: 'Physical' },
                         { id: 'hybrid', label: 'Hybrid' }
                       ].map((mode) => (
                         <div key={mode.id} className="relative">
