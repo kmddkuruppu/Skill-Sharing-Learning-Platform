@@ -115,7 +115,7 @@ export default function CourseEnrollmentForm() {
       
       // Reset form after 3 seconds and navigate back to course listing
       setTimeout(() => {
-        navigate('/courses');
+        navigate('/course');
       }, 3000);
       
     } catch (error) {
