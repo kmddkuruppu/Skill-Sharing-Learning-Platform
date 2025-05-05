@@ -25,7 +25,7 @@ import ViewEndrollment from './Admin/ViewEnrollment';
 // layout wrapper to handle conditional Nav/Footer
 function LayoutWrapper() {
   const location = useLocation();
-  const hideLayout = ['/viewcourse', '/skill' , '/dashboard' , '/viewcontact'].includes(location.pathname.toLowerCase());
+  const hideLayout = ['/viewcourse', '/skill' , '/dashboard' , '/viewcontact' , '/viewenrollment'].includes(location.pathname.toLowerCase());
 
   return (
     <>
