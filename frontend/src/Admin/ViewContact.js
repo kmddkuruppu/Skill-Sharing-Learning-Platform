@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Filter, Trash2, Mail, MessageCircle, Calendar, Download, ChevronLeft, ChevronRight, X, Check, AlertCircle } from 'lucide-react';
-
+import { Search, Filter, Mail, MessageCircle, Calendar, Download, ChevronLeft, ChevronRight, X, Check, AlertCircle } from 'lucide-react';
 export default function AdminContactMessages() {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -108,38 +107,6 @@ export default function AdminContactMessages() {
     }
   };
 
-  const deleteMessage = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this message?')) {
-      return;
-    }
-    
-    try {
-      // In a real app, you would delete from the backend
-      // await fetch(`http://localhost:8080/api/contacts/${id}`, { method: 'DELETE' });
-      
-      // For now, we'll just remove it locally
-      const updatedMessages = messages.filter(msg => msg.id !== id);
-      setMessages(updatedMessages);
-      
-      if (selectedMessage && selectedMessage.id === id) {
-        setSelectedMessage(null);
-      }
-      
-      setActionStatus({ 
-        type: 'success', 
-        message: 'Message deleted successfully' 
-      });
-      
-      setTimeout(() => setActionStatus({ type: null, message: '' }), 3000);
-    } catch (err) {
-      console.error('Error deleting message:', err);
-      setActionStatus({ 
-        type: 'error', 
-        message: 'Failed to delete message' 
-      });
-    }
-  };
-
   const handleSelectMessage = (message) => {
     setSelectedMessage(message);
     
@@ -147,6 +114,12 @@ export default function AdminContactMessages() {
     if (message.status === 'unread') {
       markAsRead(message.id);
     }
+  };
+
+  const handleReply = (email, subject) => {
+    // Navigate to Gmail compose window
+    const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(email)}&su=${encodeURIComponent(`Re: ${subject}`)}`;
+    window.open(gmailComposeUrl, '_blank');
   };
 
   // Pagination logic
@@ -343,16 +316,7 @@ export default function AdminContactMessages() {
                             <p className="text-xs text-gray-400 mb-2">
                               {formatDate(message.createdAt)}
                             </p>
-                            <button 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                deleteMessage(message.id);
-                              }}
-                              className="text-gray-400 hover:text-red-500 p-1"
-                              title="Delete message"
-                            >
-                              <Trash2 size={16} />
-                            </button>
+                            {/* Delete button removed as per requirements */}
                           </div>
                         </div>
                       </li>
@@ -443,9 +407,7 @@ export default function AdminContactMessages() {
                     </button>
                     
                     <button 
-                      onClick={() => {
-                        window.location.href = `mailto:${selectedMessage.email}?subject=Re: ${selectedMessage.subject}`;
-                      }}
+                      onClick={() => handleReply(selectedMessage.email, selectedMessage.subject)}
                       className="flex items-center justify-center px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
                     >
                       <Mail size={18} className="mr-2" />
