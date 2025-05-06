@@ -16,10 +16,10 @@ import Enrollment from './User/Enrollment';
 
 // import Admin pages
 import AddCouse from './Admin/AddCouse';
-import View from './Admin/ViewCourse';
 import Skill from './Admin/Skill';
 import Dashboard from './Admin/Dashboard';
 import ViewContact from './Admin/ViewContact';
+import ViewCourse from './Admin/ViewCourse'
 import ViewEndrollment from './Admin/ViewEnrollment';
 
 // layout wrapper to handle conditional Nav/Footer
@@ -44,9 +44,9 @@ function LayoutWrapper() {
 
         {/* Admin */}
         <Route path='/addcourse' element={<AddCouse />} />
-        <Route path='/view' element={<View />} />
         <Route path='/skill' element={<Skill />} />
         <Route path='/dashboard' element={<Dashboard />} />
+        <Route path='/viewcourse' element={<ViewCourse />} />
         <Route path='/viewcontact' element={<ViewContact />} />
         <Route path='/viewenrollment' element={<ViewEndrollment />} />
       </Routes>

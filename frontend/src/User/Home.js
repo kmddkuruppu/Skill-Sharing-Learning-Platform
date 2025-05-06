@@ -147,7 +147,7 @@ export default function Home() {
             <div className="relative hidden lg:block">
               {/* 3D-style card display */}
               <div className={`bg-gray-800/80 backdrop-blur-lg rounded-2xl overflow-hidden shadow-2xl transform transition-all duration-1000 ${isVisible ? 'translate-y-0 rotate-1' : 'translate-y-20 rotate-0'}`}>
-                <img src="../assets/images/64img.jpg" alt="Learning Platform Preview" className="w-full h-auto" />
+                <img src="" alt="Learning Platform Preview" className="w-full h-auto" />
                 <div className="p-6">
                   <h3 className="text-xl font-semibold mb-2">React Fundamentals</h3>
                   <div className="flex justify-between items-center">
