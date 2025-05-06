@@ -333,7 +333,7 @@ const AdminDashboard = () => {
           <NavItem 
             icon={<MessageSquare className="w-5 h-5" />} 
             label="Messages" 
-            path="/messages"
+            path="/viewcontact"
             active={activeTab === "messages"} 
             onClick={handleNavigation}
           />
