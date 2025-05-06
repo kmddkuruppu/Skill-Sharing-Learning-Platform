@@ -199,6 +199,29 @@ const AdminDashboard = () => {
   const navigate = useNavigate(); // Initialize navigate hook
   const location = useLocation(); // Get current location
   const [currentTime, setCurrentTime] = useState(new Date());
+
+  const [courseCount, setCourseCount] = useState("...");
+  
+  // Fetch course data when component mounts
+  useEffect(() => {
+    const fetchCourseCount = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/api/learnings');
+        if (response.ok) {
+          const data = await response.json();
+          setCourseCount(data.length.toString());
+        } else {
+          console.error('Failed to fetch courses');
+          setCourseCount("N/A");
+        }
+      } catch (error) {
+        console.error('Error fetching course data:', error);
+        setCourseCount("N/A");
+      }
+    };
+    
+    fetchCourseCount();
+  }, []);
   
   // Set active tab based on current path
   const getActiveTabFromPath = (path) => {
@@ -398,11 +421,11 @@ const AdminDashboard = () => {
             color="blue"
           />
           <StatCard 
-            icon={<Book className="w-6 h-6 text-emerald-400" />}
-            title="Active Courses"
-            value="42"
-            color="emerald"
-          />
+          icon={<Book className="w-6 h-6 text-emerald-400" />}
+          title="Active Courses"
+          value={courseCount}
+          color="emerald"
+        />
           <StatCard 
             icon={<Trophy className="w-6 h-6 text-amber-400" />}
             title="Skills Shared"
