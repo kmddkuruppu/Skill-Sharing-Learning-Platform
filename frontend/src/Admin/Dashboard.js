@@ -256,7 +256,7 @@ const AdminDashboard = () => {
       name: "Dasun",
       title: "Learning Plan Management",
       icon: <Zap />,
-      link: "/team/dasun",
+      link: "/viewcourse",
       bgColor: "bg-gray-900",
       accentColor: "blue"
     },
