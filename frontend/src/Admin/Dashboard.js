@@ -113,8 +113,6 @@ const Card = ({ name, title, icon, link, bgColor, accentColor = "purple" }) => {
           <p className={`text-gray-300 text-sm font-medium transition-all duration-300 ${colorVariants[accentColor].hoverText} mb-6`}>
             {title}
           </p>
-
-          {/* Send Message button removed */}
         </div>
         
         {/* Holographic button */}
@@ -285,9 +283,9 @@ const AdminDashboard = () => {
           />
           <NavItem 
             icon={<Book className="w-5 h-5" />} 
-            label="Courses" 
-            active={activeTab === "courses"} 
-            onClick={() => setActiveTab("courses")}
+            label="Course" 
+            active={activeTab === "course"} 
+            onClick={() => setActiveTab("/course")}
           />
           <NavItem 
             icon={<Calendar className="w-5 h-5" />} 
