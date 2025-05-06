@@ -3,10 +3,12 @@ import {
   Users, Brain, Book, Calendar, BarChart, Settings, Coffee, 
   Trophy, Zap, Star, Briefcase, CircleUser, MessageSquare, Clock
 } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom"; // Import routing hooks
 
 // Modified Card Component - without send message button and with perfect circle profile
 const Card = ({ name, title, icon, link, bgColor, accentColor = "purple" }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const navigate = useNavigate(); // Get navigate function
 
   // Default images for each team member - keep this for fallback
   const teamImages = {
@@ -49,6 +51,11 @@ const Card = ({ name, title, icon, link, bgColor, accentColor = "purple" }) => {
       hoverText: "group-hover:text-amber-300",
       hoverBorder: "group-hover:border-amber-400"
     }
+  };
+
+  // Handle dashboard button click
+  const handleViewDashboard = () => {
+    navigate(link); // Navigate to the specific team member's dashboard
   };
 
   return (
@@ -113,12 +120,11 @@ const Card = ({ name, title, icon, link, bgColor, accentColor = "purple" }) => {
           <p className={`text-gray-300 text-sm font-medium transition-all duration-300 ${colorVariants[accentColor].hoverText} mb-6`}>
             {title}
           </p>
-
-          {/* Send Message button removed */}
         </div>
         
-        {/* Holographic button */}
+        {/* Holographic button - now with click handler */}
         <button
+          onClick={handleViewDashboard}
           className={`relative px-6 py-2 bg-gray-800/70 backdrop-blur-sm rounded-lg border border-gray-600 overflow-hidden ${colorVariants[accentColor].hoverBorder} transition-all duration-300 w-fit`}
         >
           <span className="relative z-10 text-white font-medium flex items-center">
@@ -154,7 +160,7 @@ const Card = ({ name, title, icon, link, bgColor, accentColor = "purple" }) => {
 };
 
 // Sidebar Navigation Item
-const NavItem = ({ icon, label, active, onClick }) => {
+const NavItem = ({ icon, label, path, active, onClick }) => {
   return (
     <div 
       className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-all duration-300 ${
@@ -162,7 +168,7 @@ const NavItem = ({ icon, label, active, onClick }) => {
           ? 'bg-purple-500/20 text-purple-400 border-l-4 border-purple-500' 
           : 'text-gray-400 hover:bg-gray-800/50 hover:text-gray-200'
       }`}
-      onClick={onClick}
+      onClick={() => onClick(path)}
     >
       {icon}
       <span className="font-medium">{label}</span>
@@ -190,8 +196,23 @@ const StatCard = ({ icon, title, value, color }) => {
 
 // Main Dashboard Component
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const navigate = useNavigate(); // Initialize navigate hook
+  const location = useLocation(); // Get current location
   const [currentTime, setCurrentTime] = useState(new Date());
+  
+  // Set active tab based on current path
+  const getActiveTabFromPath = (path) => {
+    const pathSegment = path.split('/')[1] || 'dashboard';
+    return pathSegment;
+  };
+  
+  const [activeTab, setActiveTab] = useState(() => getActiveTabFromPath(location.pathname));
+  
+  // Handle navigation
+  const handleNavigation = (path) => {
+    setActiveTab(path.replace('/', ''));
+    navigate(path);
+  };
   
   // Update time every second
   useEffect(() => {
@@ -199,10 +220,13 @@ const AdminDashboard = () => {
       setCurrentTime(new Date());
     }, 1000);
     
+    // Update active tab when location changes
+    setActiveTab(getActiveTabFromPath(location.pathname));
+    
     return () => {
       clearInterval(timer);
     };
-  }, []);
+  }, [location.pathname]);
   
   // Format date and time
   const formattedDate = currentTime.toLocaleDateString('en-US', {
@@ -224,7 +248,7 @@ const AdminDashboard = () => {
       name: "Dinupa",
       title: "Project Leader",
       icon: <Star />,
-      link: "/admin/dinupa",
+      link: "/team/dinupa",
       bgColor: "bg-gray-900",
       accentColor: "purple"
     },
@@ -232,7 +256,7 @@ const AdminDashboard = () => {
       name: "Dasun",
       title: "Learning Plan Management",
       icon: <Zap />,
-      link: "/admin/dasun",
+      link: "/viewcourse",
       bgColor: "bg-gray-900",
       accentColor: "blue"
     },
@@ -240,7 +264,7 @@ const AdminDashboard = () => {
       name: "Chamodi",
       title: "Skill Sharing Management",
       icon: <Book />,
-      link: "/admin/chamodi",
+      link: "/team/chamodi",
       bgColor: "bg-gray-900",
       accentColor: "emerald"
     },
@@ -248,7 +272,7 @@ const AdminDashboard = () => {
       name: "Udesha",
       title: "UX/UI Designer",
       icon: <Briefcase />,
-      link: "/admin/udesha",
+      link: "/team/udesha",
       bgColor: "bg-gray-900",
       accentColor: "amber"
     }
@@ -269,43 +293,49 @@ const AdminDashboard = () => {
           </div>
         </div>
         
-        {/* Navigation */}
+        {/* Navigation - Modified with proper paths */}
         <nav className="space-y-1">
           <NavItem 
             icon={<BarChart className="w-5 h-5" />} 
             label="Dashboard" 
+            path="/dashboard"
             active={activeTab === "dashboard"} 
-            onClick={() => setActiveTab("dashboard")}
+            onClick={handleNavigation}
           />
           <NavItem 
             icon={<Users className="w-5 h-5" />} 
             label="Team Members" 
+            path="/team"
             active={activeTab === "team"} 
-            onClick={() => setActiveTab("team")}
+            onClick={handleNavigation}
           />
           <NavItem 
             icon={<Book className="w-5 h-5" />} 
-            label="Courses" 
-            active={activeTab === "courses"} 
-            onClick={() => setActiveTab("courses")}
+            label="Course" 
+            path="/course"
+            active={activeTab === "course"} 
+            onClick={handleNavigation}
           />
           <NavItem 
             icon={<Calendar className="w-5 h-5" />} 
             label="Schedule" 
+            path="/schedule"
             active={activeTab === "schedule"} 
-            onClick={() => setActiveTab("schedule")}
+            onClick={handleNavigation}
           />
           <NavItem 
             icon={<Trophy className="w-5 h-5" />} 
             label="Skills" 
+            path="/skills"
             active={activeTab === "skills"} 
-            onClick={() => setActiveTab("skills")}
+            onClick={handleNavigation}
           />
           <NavItem 
             icon={<MessageSquare className="w-5 h-5" />} 
             label="Messages" 
+            path="/viewcontact"
             active={activeTab === "messages"} 
-            onClick={() => setActiveTab("messages")}
+            onClick={handleNavigation}
           />
         </nav>
         
@@ -314,8 +344,9 @@ const AdminDashboard = () => {
             <NavItem 
               icon={<Settings className="w-5 h-5" />} 
               label="Settings" 
+              path="/settings"
               active={activeTab === "settings"} 
-              onClick={() => setActiveTab("settings")}
+              onClick={handleNavigation}
             />
           </div>
           
