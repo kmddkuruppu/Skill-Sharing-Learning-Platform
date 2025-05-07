@@ -23,7 +23,7 @@ export default function SuccessStories() {
       name: "David Chen",
       title: "From Novice to Full-Stack Developer in 6 Months",
       category: "coding",
-      image: "/api/placeholder/400/400",
+      image: "../assets/images/p1.jpg",
       quote: "I had zero coding experience when I started. The structured learning path and supportive community helped me land my dream job at a tech startup.",
       rating: 5,
       position: "Software Engineer at TechFlow",
@@ -35,7 +35,7 @@ export default function SuccessStories() {
       name: "Sophia Rodriguez",
       title: "Turned My Cooking Passion Into a Thriving Business",
       category: "cooking",
-      image: "/api/placeholder/400/400",
+      image: "../assets/images/ch1.jpg",
       quote: "The expert guidance from professional chefs taught me not just recipes, but the science and business of food. Now I run my own catering company.",
       rating: 5,
       position: "Founder of Taste Fusion Catering",
@@ -47,7 +47,7 @@ export default function SuccessStories() {
       name: "Marcus Johnson",
       title: "From Amateur Shots to Professional Photography",
       category: "photography",
-      image: "/api/placeholder/400/400",
+      image: "../assets/images/ph1.jpg",
       quote: "The detailed feedback on my work and advanced techniques taught by industry professionals transformed my photography skills completely.",
       rating: 5,
       position: "Professional Photographer",
@@ -59,7 +59,7 @@ export default function SuccessStories() {
       name: "Emily Thompson",
       title: "DIY Skills That Launched My Etsy Empire",
       category: "diy",
-      image: "/api/placeholder/400/400",
+      image: "../assets/images/cr.jpg",
       quote: "I learned everything from woodworking to textile arts, and now my handmade products sell out within hours of listing them.",
       rating: 5,
       position: "Owner of HandcraftedJoy Shop",
@@ -142,7 +142,7 @@ export default function SuccessStories() {
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-b from-gray-900/95 via-gray-900/80 to-gray-900/95 z-10"></div>
           <img 
-            src="/api/placeholder/1920/600" 
+            src="../assets/images/su1.jpg" 
             alt="Success Stories Background" 
             className="w-full h-full object-cover object-center"
           />

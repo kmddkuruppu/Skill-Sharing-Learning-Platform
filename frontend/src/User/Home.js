@@ -54,10 +54,10 @@ export default function Home() {
   ];
 
   const trendingSkills = [
-    { id: 1, title: 'React Fundamentals', category: 'coding', instructor: 'Alex Johnson', students: 2483, rating: 4.9, image: '/api/placeholder/300/200' },
-    { id: 2, title: 'Italian Cuisine Mastery', category: 'cooking', instructor: 'Maria Romano', students: 1872, rating: 4.8, image: '/api/placeholder/300/200' },
+    { id: 1, title: 'React Fundamentals', category: 'coding', instructor: 'Alex Johnson', students: 2483, rating: 4.9, image: '/../assets/images/react.jpg' },
+    { id: 2, title: 'Italian Cuisine Mastery', category: 'cooking', instructor: 'Maria Romano', students: 1872, rating: 4.8, image: '/../assets/images/cook.jpg' },
     { id: 3, title: 'Portrait Photography', category: 'photography', instructor: 'Sam Wilson', students: 1456, rating: 4.7, image: '/../assets/images/im2.jpg' },
-    { id: 4, title: 'DIY Home Decor', category: 'diy', instructor: 'Emma Davis', students: 1293, rating: 4.6, image: '/api/placeholder/300/200' }
+    { id: 4, title: 'DIY Home Decor', category: 'diy', instructor: 'Emma Davis', students: 1293, rating: 4.6, image: '/../assets/images/diy.jpg' }
   ];
 
   const testimonials = [
