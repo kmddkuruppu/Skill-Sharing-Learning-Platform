@@ -13,6 +13,7 @@ import Success from './User/Success';
 import Instructor from './User/Instructor';
 import Community from './User/Community';
 import Enrollment from './User/Enrollment';
+import Plan from './User/Plan'
 
 // import Admin pages
 import AddCouse from './Admin/AddCouse';
@@ -41,6 +42,7 @@ function LayoutWrapper() {
         <Route path='/instructor' element={<Instructor />} />
         <Route path='/community' element={<Community />} />
         <Route path='/enrollment' element={<Enrollment />} />
+        <Route path='/plan' element={<Plan />} />
 
         {/* Admin */}
         <Route path='/addcourse' element={<AddCouse />} />
