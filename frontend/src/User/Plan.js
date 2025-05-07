@@ -445,10 +445,6 @@ export default function LearningPlanSharingPage() {
                   <span className="font-semibold text-lg">42</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-400">Most Popular</span>
-                  <span className="font-semibold text-lg">Coding</span>
-                </div>
-                <div className="flex justify-between items-center">
                   <span className="text-gray-400">Avg. Completion Rate</span>
                   <span className="font-semibold text-lg">76%</span>
                 </div>
