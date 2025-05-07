@@ -582,11 +582,6 @@ export default function CourseContentModal({ isOpen, onClose, courseId }) {
           >
             Close
           </button>
-          
-          <button className="px-5 py-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-colors flex items-center">
-            Enroll Now
-            <ArrowRight size={16} className="ml-2" />
-          </button>
         </div>
       </div>
     </div>
