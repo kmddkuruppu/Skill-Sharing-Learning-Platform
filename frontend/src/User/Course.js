@@ -36,6 +36,11 @@ export default function CoursesDisplayWall() {
     navigate(`/enrollment?courseId=${course.courseId}&courseName=${encodeURIComponent(course.courseName)}`);
   };
 
+  // Format price to LKR with thousands separators
+  const formatPriceToLKR = (price) => {
+    return `LKR ${price.toLocaleString('en-LK')}`;
+  };
+
   // Fetch courses from the backend API
   useEffect(() => {
     const fetchCourses = async () => {
@@ -55,7 +60,8 @@ export default function CoursesDisplayWall() {
           id: course.id,
           courseId: course.courseId,
           courseName: course.courseName,
-          courseFee: `$${course.courseFee}`,
+          // Format to LKR instead of USD
+          courseFee: formatPriceToLKR(course.courseFee),
           description: course.description,
           duration: course.duration,
           // Parse job opportunities from string to array
@@ -81,7 +87,8 @@ export default function CoursesDisplayWall() {
             id: "1",
             courseId: "CS101",
             courseName: "Introduction to Web Development",
-            courseFee: "$299",
+            // Mock data also using LKR instead of USD
+            courseFee: "LKR 59,800",
             description: "Learn the fundamentals of web development including HTML, CSS and JavaScript.",
             duration: "8 weeks",
             jobOpportunities: ["Frontend Developer", "Web Designer", "UI Developer"],
@@ -95,7 +102,8 @@ export default function CoursesDisplayWall() {
             id: "2",
             courseId: "CS102",
             courseName: "React.js Fundamentals",
-            courseFee: "$349",
+            // Mock data also using LKR instead of USD
+            courseFee: "LKR 69,800",
             description: "Build modern user interfaces with React, the popular JavaScript library.",
             duration: "10 weeks",
             jobOpportunities: ["React Developer", "Frontend Engineer", "JavaScript Developer"],
@@ -109,7 +117,8 @@ export default function CoursesDisplayWall() {
             id: "3",
             courseId: "CS103",
             courseName: "Backend Development with Node.js",
-            courseFee: "$399",
+            // Mock data also using LKR instead of USD
+            courseFee: "LKR 79,800",
             description: "Create scalable server-side applications using Node.js and Express.",
             duration: "12 weeks",
             jobOpportunities: ["Backend Developer", "Node.js Developer", "Full Stack Developer"],
