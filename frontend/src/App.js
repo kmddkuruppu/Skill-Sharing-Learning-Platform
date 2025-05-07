@@ -14,6 +14,7 @@ import Instructor from './User/Instructor';
 import Community from './User/Community';
 import Enrollment from './User/Enrollment';
 import Plan from './User/Plan'
+import CreatePlan from './User/CreatePlan';
 
 // import Admin pages
 import AddCouse from './Admin/AddCouse';
@@ -43,6 +44,7 @@ function LayoutWrapper() {
         <Route path='/community' element={<Community />} />
         <Route path='/enrollment' element={<Enrollment />} />
         <Route path='/plan' element={<Plan />} />
+        <Route path='/createplan' element={<CreatePlan />} />
 
         {/* Admin */}
         <Route path='/addcourse' element={<AddCouse />} />

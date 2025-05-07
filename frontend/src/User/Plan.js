@@ -1,15 +1,21 @@
 import { useState, useEffect } from 'react';
 import { Search, BookOpen, Clock, Calendar, Share2, Heart, BookmarkPlus, Users, Star, ArrowRight, Filter, Download, Eye } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function LearningPlanSharingPage() {
   const [isVisible, setIsVisible] = useState(false);
   const [activeTab, setActiveTab] = useState('discover');
   const [selectedDifficulty, setSelectedDifficulty] = useState('all');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const navigate = useNavigate();
   
   useEffect(() => {
     setIsVisible(true);
   }, []);
+
+  const handleCreatePlan = () => {
+    navigate('/createPlan');
+  };
 
   const categories = [
     { id: 'coding', name: 'Coding' },
@@ -27,118 +33,13 @@ export default function LearningPlanSharingPage() {
     { id: 'expert', name: 'Expert', color: 'bg-red-500' }
   ];
 
-  const learningPlans = [
-    {
-      id: 1,
-      title: 'Full-Stack Web Development Roadmap',
-      description: 'A comprehensive guide to becoming a full-stack developer, covering HTML, CSS, JavaScript, React, Node.js, and database technologies.',
-      author: 'Alex Johnson',
-      authorAvatar: '/api/placeholder/32/32',
-      rating: 4.9,
-      reviews: 256,
-      duration: '12 weeks',
-      difficulty: 'intermediate',
-      category: 'coding',
-      saved: 1243,
-      image: '/api/placeholder/400/200',
-      featured: true
-    },
-    {
-      id: 2,
-      title: 'Italian Cuisine Masterclass',
-      description: 'Learn the fundamentals of Italian cooking, from pasta and sauces to classic desserts. Includes meal preparation techniques and flavor profiles.',
-      author: 'Maria Romano',
-      authorAvatar: '/api/placeholder/32/32',
-      rating: 4.8,
-      reviews: 187,
-      duration: '4 weeks',
-      difficulty: 'beginner',
-      category: 'cooking',
-      saved: 873,
-      image: '/api/placeholder/400/200'
-    },
-    {
-      id: 3,
-      title: 'Advanced Portrait Photography',
-      description: 'Master portrait photography with advanced lighting techniques, composition strategies, and post-processing skills.',
-      author: 'Sam Wilson',
-      authorAvatar: '/api/placeholder/32/32',
-      rating: 4.7,
-      reviews: 134,
-      duration: '6 weeks',
-      difficulty: 'advanced',
-      category: 'photography',
-      saved: 762,
-      image: '/api/placeholder/400/200'
-    },
-    {
-      id: 4,
-      title: 'DIY Home Renovation Projects',
-      description: 'A step-by-step guide to handling home renovation projects yourself, including repairs, painting, and basic carpentry.',
-      author: 'Emma Davis',
-      authorAvatar: '/api/placeholder/32/32',
-      rating: 4.6,
-      reviews: 112,
-      duration: '8 weeks',
-      difficulty: 'intermediate',
-      category: 'diy',
-      saved: 651,
-      image: '/api/placeholder/400/200'
-    },
-    {
-      id: 5,
-      title: 'Piano From Scratch',
-      description: 'Learn to play piano from the very beginning with progressive lessons covering technique, music theory, and popular songs.',
-      author: 'Michael Chen',
-      authorAvatar: '/api/placeholder/32/32',
-      rating: 4.9,
-      reviews: 201,
-      duration: '16 weeks',
-      difficulty: 'beginner',
-      category: 'music',
-      saved: 943,
-      image: '/api/placeholder/400/200'
-    },
-    {
-      id: 6,
-      title: 'Machine Learning Fundamentals',
-      description: 'Dive into machine learning algorithms, data preprocessing, model evaluation, and practical applications with Python.',
-      author: 'Priya Sharma',
-      authorAvatar: '/api/placeholder/32/32',
-      rating: 4.8,
-      reviews: 176,
-      duration: '10 weeks',
-      difficulty: 'advanced',
-      category: 'coding',
-      saved: 1087,
-      image: '/api/placeholder/400/200'
-    }
-  ];
+  // Removed the hardcoded learning plans array
+  const learningPlans = [];
 
-  const youMightLike = [
-    {
-      id: 7,
-      title: 'Spanish in 30 Days',
-      category: 'language',
-      difficulty: 'beginner',
-      image: '/api/placeholder/120/80'
-    },
-    {
-      id: 8,
-      title: 'Watercolor Painting Techniques',
-      category: 'diy',
-      difficulty: 'intermediate',
-      image: '/api/placeholder/120/80'
-    },
-    {
-      id: 9,
-      title: 'Mobile App Development with Flutter',
-      category: 'coding',
-      difficulty: 'intermediate',
-      image: '/api/placeholder/120/80'
-    }
-  ];
+  // Removed content from youMightLike array
+  const youMightLike = [];
 
+  // Filter empty learning plans array (this will always return an empty array)
   const filteredPlans = learningPlans.filter(plan => {
     if (selectedCategory !== 'all' && plan.category !== selectedCategory) return false;
     if (selectedDifficulty !== 'all' && plan.difficulty !== selectedDifficulty) return false;
@@ -176,7 +77,10 @@ export default function LearningPlanSharingPage() {
                   className="w-full py-3.5 pl-12 pr-4 rounded-full bg-gray-800/80 backdrop-blur-sm border border-gray-700 focus:border-blue-400 focus:ring-2 focus:ring-blue-400 focus:outline-none shadow-lg"
                 />
               </div>
-              <button className="py-3.5 px-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full hover:from-blue-600 hover:to-purple-700 transition-all flex items-center justify-center font-medium shadow-lg shadow-blue-500/20 md:ml-4">
+              <button 
+                className="py-3.5 px-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full hover:from-blue-600 hover:to-purple-700 transition-all flex items-center justify-center font-medium shadow-lg shadow-blue-500/20 md:ml-4"
+                onClick={handleCreatePlan}
+              >
                 Create Plan <ArrowRight size={18} className="ml-2" />
               </button>
             </div>
@@ -252,147 +156,24 @@ export default function LearningPlanSharingPage() {
         <div className="container mx-auto px-6">
           {activeTab === 'discover' && (
             <>
-              {/* Featured Learning Plan */}
-              {filteredPlans.some(plan => plan.featured) && (
-                <div className="mb-12">
-                  <h2 className="text-2xl font-bold mb-6 flex items-center">
-                    <Star className="mr-2 text-yellow-400" fill="#FACC15" />
-                    Featured Learning Plan
-                  </h2>
-                  
-                  {filteredPlans.filter(plan => plan.featured).map(plan => (
-                    <div 
-                      key={plan.id}
-                      className="bg-gradient-to-r from-gray-800 to-gray-850 rounded-2xl overflow-hidden border border-gray-700 hover:border-blue-400 transition-all shadow-lg"
-                    >
-                      <div className="grid grid-cols-1 lg:grid-cols-3">
-                        <div className="relative h-48 lg:h-full">
-                          <img src={plan.image} alt={plan.title} className="absolute inset-0 w-full h-full object-cover" />
-                          <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent"></div>
-                          <div className="absolute top-4 left-4">
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getDifficultyColor(plan.difficulty)} text-white`}>
-                              {difficultiesData.find(d => d.id === plan.difficulty).name}
-                            </span>
-                          </div>
-                        </div>
-                        
-                        <div className="p-6 lg:col-span-2">
-                          <h3 className="text-2xl font-bold mb-3">{plan.title}</h3>
-                          <p className="text-gray-300 mb-6">{plan.description}</p>
-                          
-                          <div className="flex flex-wrap items-center gap-6 mb-6">
-                            <div className="flex items-center">
-                              <img src={plan.authorAvatar} alt={plan.author} className="w-8 h-8 rounded-full mr-2" />
-                              <span className="text-sm text-gray-300">By {plan.author}</span>
-                            </div>
-                            <div className="flex items-center">
-                              <Clock size={16} className="mr-2 text-gray-400" />
-                              <span className="text-sm text-gray-300">{plan.duration}</span>
-                            </div>
-                            <div className="flex items-center">
-                              <Star size={16} className="mr-2 text-yellow-400" fill="#FACC15" />
-                              <span className="text-sm text-gray-300">{plan.rating} ({plan.reviews} reviews)</span>
-                            </div>
-                            <div className="flex items-center">
-                              <BookmarkPlus size={16} className="mr-2 text-gray-400" />
-                              <span className="text-sm text-gray-300">{plan.saved} saved</span>
-                            </div>
-                          </div>
-                          
-                          <div className="flex flex-wrap gap-4">
-                            <button className="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full hover:from-blue-600 hover:to-purple-700 transition-all flex items-center justify-center text-sm font-medium">
-                              View Plan
-                            </button>
-                            <button className="px-6 py-2.5 bg-gray-700 rounded-full hover:bg-gray-600 transition-all flex items-center justify-center text-sm font-medium">
-                              <BookmarkPlus size={16} className="mr-2" />
-                              Save
-                            </button>
-                            <button className="px-6 py-2.5 bg-gray-700 rounded-full hover:bg-gray-600 transition-all flex items-center justify-center text-sm font-medium">
-                              <Share2 size={16} className="mr-2" />
-                              Share
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
+              {/* No featured learning plans to display */}
+              
               {/* Main Learning Plans Grid */}
               <div className="mb-12">
                 <h2 className="text-2xl font-bold mb-6">All Learning Plans</h2>
                 
-                {filteredPlans.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredPlans.filter(plan => !plan.featured).map((plan, index) => (
-                      <div 
-                        key={plan.id}
-                        className="bg-gray-800 rounded-xl overflow-hidden border border-gray-700 hover:border-blue-400 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg"
-                        style={{animationDelay: `${index * 100}ms`}}
-                      >
-                        <div className="relative">
-                          <img src={plan.image} alt={plan.title} className="w-full h-48 object-cover" />
-                          <div className="absolute top-3 right-3 bg-gray-900/80 backdrop-blur-sm px-2.5 py-1 rounded-full text-xs font-medium flex items-center">
-                            <Star size={14} className="text-yellow-400 mr-1" fill="#FACC15" />
-                            {plan.rating}
-                          </div>
-                          <div className="absolute top-3 left-3">
-                            <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${getDifficultyColor(plan.difficulty)} text-white`}>
-                              {difficultiesData.find(d => d.id === plan.difficulty).name}
-                            </span>
-                          </div>
-                        </div>
-                        
-                        <div className="p-5">
-                          <div className="flex items-center mb-3">
-                            <span className="text-xs text-gray-400">{categories.find(cat => cat.id === plan.category).name}</span>
-                          </div>
-                          <h3 className="text-lg font-semibold mb-2">{plan.title}</h3>
-                          <p className="text-gray-400 text-sm mb-4 line-clamp-2">{plan.description}</p>
-                          
-                          <div className="flex justify-between items-center mb-4">
-                            <div className="flex items-center">
-                              <img src={plan.authorAvatar} alt={plan.author} className="w-6 h-6 rounded-full mr-2" />
-                              <span className="text-xs text-gray-400">{plan.author}</span>
-                            </div>
-                            <span className="text-xs text-gray-400 flex items-center">
-                              <Clock size={14} className="mr-1.5" />
-                              {plan.duration}
-                            </span>
-                          </div>
-                          
-                          <div className="flex items-center justify-between">
-                            <button className="text-blue-400 hover:text-blue-300 text-sm font-medium flex items-center transition-colors">
-                              View plan <ArrowRight size={16} className="ml-1.5" />
-                            </button>
-                            <div className="flex space-x-2">
-                              <button className="p-2 rounded-full bg-gray-700 hover:bg-gray-600 transition-all">
-                                <BookmarkPlus size={16} />
-                              </button>
-                              <button className="p-2 rounded-full bg-gray-700 hover:bg-gray-600 transition-all">
-                                <Share2 size={16} />
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12 bg-gray-800/50 rounded-xl border border-gray-700">
-                    <p className="text-gray-400 text-lg">No learning plans match your filters.</p>
-                    <button 
-                      className="mt-4 px-6 py-2 bg-blue-500 rounded-full hover:bg-blue-600 transition-all text-sm font-medium"
-                      onClick={() => {
-                        setSelectedCategory('all');
-                        setSelectedDifficulty('all');
-                      }}
-                    >
-                      Clear filters
-                    </button>
-                  </div>
-                )}
+                {/* Display empty state since there are no learning plans */}
+                <div className="text-center py-16 bg-gray-800/50 rounded-xl border border-gray-700">
+                  <BookOpen size={48} className="mx-auto mb-6 text-blue-400" />
+                  <p className="text-gray-300 text-lg mb-2">No learning plans available.</p>
+                  <p className="text-gray-400 mb-6">Be the first to create and share a learning plan!</p>
+                  <button 
+                    className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full hover:from-blue-600 hover:to-purple-700 transition-all text-sm font-medium"
+                    onClick={handleCreatePlan}
+                  >
+                    Create New Plan
+                  </button>
+                </div>
               </div>
             </>
           )}
@@ -403,7 +184,10 @@ export default function LearningPlanSharingPage() {
                 <BookOpen size={48} className="mx-auto mb-6 text-blue-400" />
                 <h3 className="text-2xl font-bold mb-4">Create your first learning plan</h3>
                 <p className="text-gray-400 mb-6">Share your knowledge and help others learn by creating a structured learning plan.</p>
-                <button className="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full hover:from-blue-600 hover:to-purple-700 transition-all font-medium shadow-lg">
+                <button 
+                  className="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full hover:from-blue-600 hover:to-purple-700 transition-all font-medium shadow-lg"
+                  onClick={handleCreatePlan}
+                >
                   Create New Plan
                 </button>
               </div>
@@ -438,40 +222,26 @@ export default function LearningPlanSharingPage() {
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-400">Total Plans</span>
-                  <span className="font-semibold text-lg">1,234</span>
+                  <span className="font-semibold text-lg">0</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-400">Created Today</span>
-                  <span className="font-semibold text-lg">42</span>
+                  <span className="font-semibold text-lg">0</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-400">Avg. Completion Rate</span>
-                  <span className="font-semibold text-lg">76%</span>
+                  <span className="font-semibold text-lg">0%</span>
                 </div>
               </div>
             </div>
             
-            {/* You Might Like */}
+            {/* You Might Like - Empty State */}
             <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
               <h3 className="text-xl font-bold mb-4">You Might Like</h3>
-              <div className="space-y-4">
-                {youMightLike.map(item => (
-                  <div key={item.id} className="flex items-center space-x-3 p-2 hover:bg-gray-700 rounded-lg transition-all cursor-pointer">
-                    <img src={item.image} alt={item.title} className="w-12 h-12 rounded-lg object-cover" />
-                    <div>
-                      <h4 className="font-medium text-sm">{item.title}</h4>
-                      <div className="flex items-center mt-1">
-                        <span className="text-xs text-gray-400">{categories.find(cat => cat.id === item.category).name}</span>
-                        <span className="mx-1 text-gray-500">•</span>
-                        <span className="text-xs text-gray-400">{difficultiesData.find(d => d.id === item.difficulty).name}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+              <div className="py-8 text-center">
+                <p className="text-gray-400 mb-4">No recommended plans available yet.</p>
+                <p className="text-sm text-gray-500">Check back later for personalized recommendations.</p>
               </div>
-              <button className="w-full mt-4 py-2 text-sm text-blue-400 hover:text-blue-300 transition-colors">
-                View More
-              </button>
             </div>
             
             {/* Tips for Creating Plans */}
@@ -523,7 +293,10 @@ export default function LearningPlanSharingPage() {
               <p className="text-gray-300 mb-8">Create a structured learning plan and help others master the skills you've acquired. Share your expertise with our global community.</p>
               
               <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-                <button className="px-8 py-3.5 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full hover:from-blue-600 hover:to-purple-700 transition-all font-medium shadow-lg shadow-blue-500/20">
+                <button
+                  className="px-8 py-3.5 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full hover:from-blue-600 hover:to-purple-700 transition-all font-medium shadow-lg shadow-blue-500/20"
+                  onClick={handleCreatePlan}
+                >
                   Create Learning Plan
                 </button>
                 <button className="px-8 py-3.5 bg-transparent border border-gray-400 rounded-full hover:border-white transition-all font-medium">
