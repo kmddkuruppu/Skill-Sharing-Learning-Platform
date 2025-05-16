@@ -11,7 +11,9 @@ import {
   Briefcase,
   AlertCircle,
   Check,
-  Layers
+  Layers,
+  Calendar,
+  Sparkles
 } from 'lucide-react';
 import ParticlesTheme from "../Components/Theme";
 import SuccessAlert from "../Components/SuccessAlert";
@@ -34,10 +36,9 @@ export default function CourseAdminForm() {
   const [errorMessage, setErrorMessage] = useState('');
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
 
-  // Duration options
+  // Updated duration options as requested
   const durationOptions = [
-    '4 weeks', '6 weeks', '8 weeks', '10 weeks', 
-    '12 weeks', '16 weeks', '24 weeks', 'Self-paced'
+    '6 months', '12 months', '24 months', '36 months'
   ];
 
   useEffect(() => {
@@ -47,8 +48,16 @@ export default function CourseAdminForm() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     
+    // Special handling for courseName to prevent numbers
+    if (name === 'courseName') {
+      const textOnlyValue = value.replace(/[0-9]/g, '');
+      setFormData({
+        ...formData,
+        [name]: textOnlyValue
+      });
+    }
     // Handle special case for courseFee to ensure it's a number
-    if (name === 'courseFee') {
+    else if (name === 'courseFee') {
       const numericValue = value.replace(/[^0-9.]/g, '');
       setFormData({
         ...formData,
@@ -273,25 +282,28 @@ export default function CourseAdminForm() {
         <header className="py-12">
           <div className="container mx-auto px-6">
             <div className="max-w-4xl mx-auto">
-              <h1 className="text-3xl md:text-4xl font-bold mb-4">
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
-                  Course Management
-                </span>
-              </h1>
-              <p className="text-lg text-gray-300">
-                Add new courses with essential details
+              <div className="flex items-center mb-4">
+                <Sparkles className="text-blue-400 mr-3 h-8 w-8" />
+                <h1 className="text-3xl md:text-4xl font-bold">
+                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-violet-400 to-purple-500">
+                    Course Management
+                  </span>
+                </h1>
+              </div>
+              <p className="text-lg text-gray-300 ml-11">
+                Create and manage your educational offerings
               </p>
             </div>
           </div>
         </header>
 
         {/* Form Section */}
-        <section className="py-12">
+        <section className="py-8">
           <div className="container mx-auto px-6">
             <div className="max-w-4xl mx-auto">
-              <div className="bg-gray-800/70 backdrop-blur-sm rounded-xl overflow-hidden border border-gray-700 shadow-xl">
+              <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/90 backdrop-blur-sm rounded-xl overflow-hidden border border-gray-700/50 shadow-2xl">
                 {/* Form Header */}
-                <div className="px-6 py-4 bg-gray-800/90 border-b border-gray-700 flex justify-between items-center">
+                <div className="px-6 py-5 bg-gradient-to-r from-blue-900/20 to-purple-900/20 border-b border-gray-700/70 flex justify-between items-center">
                   <h2 className="text-xl font-semibold flex items-center">
                     <Plus size={20} className="mr-2 text-blue-400" />
                     Add New Course
@@ -299,7 +311,7 @@ export default function CourseAdminForm() {
                   <div className="flex space-x-2">
                     <button 
                       onClick={handleReset}
-                      className="p-2 rounded-lg hover:bg-gray-700 transition-colors"
+                      className="p-2 rounded-lg bg-gray-800/50 hover:bg-gray-700 transition-colors"
                       title="Reset form"
                     >
                       <X size={20} />
@@ -309,7 +321,7 @@ export default function CourseAdminForm() {
 
                 {/* Success Message */}
                 {successMessage && (
-                  <div className="mx-6 mt-6 px-4 py-3 bg-green-500/20 border border-green-500 rounded-lg flex items-center">
+                  <div className="mx-6 mt-6 px-4 py-3 bg-green-500/20 border border-green-500/50 rounded-lg flex items-center">
                     <Check size={18} className="text-green-400 mr-2" />
                     <p className="text-green-400">{successMessage}</p>
                   </div>
@@ -317,7 +329,7 @@ export default function CourseAdminForm() {
 
                 {/* Error Message */}
                 {errorMessage && (
-                  <div className="mx-6 mt-6 px-4 py-3 bg-red-500/20 border border-red-500 rounded-lg flex items-center">
+                  <div className="mx-6 mt-6 px-4 py-3 bg-red-500/20 border border-red-500/50 rounded-lg flex items-center">
                     <AlertCircle size={18} className="text-red-400 mr-2" />
                     <p className="text-red-400">{errorMessage}</p>
                   </div>
@@ -329,7 +341,7 @@ export default function CourseAdminForm() {
                     {/* Course ID */}
                     <div className="space-y-2">
                       <label className="block text-sm font-medium text-gray-300 flex items-center">
-                        <Hash size={16} className="mr-2 text-gray-400" />
+                        <Hash size={16} className="mr-2 text-blue-400" />
                         Course ID
                       </label>
                       <div className="relative">
@@ -339,7 +351,7 @@ export default function CourseAdminForm() {
                           value={formData.courseId}
                           onChange={handleInputChange}
                           placeholder="e.g., FE001"
-                          className={`w-full p-3 rounded-lg bg-gray-900/80 border ${errors.courseId ? 'border-red-500' : 'border-gray-700'} focus:border-blue-400 focus:ring-2 focus:ring-blue-400 focus:outline-none text-base`}
+                          className={`w-full p-3 rounded-lg bg-gray-900/80 border ${errors.courseId ? 'border-red-500' : 'border-gray-700/50'} focus:border-blue-400 focus:ring-2 focus:ring-blue-400/30 focus:outline-none text-base transition-all`}
                         />
                         {errors.courseId && (
                           <p className="mt-1 text-xs text-red-400 flex items-center">
@@ -353,7 +365,7 @@ export default function CourseAdminForm() {
                     {/* Course Fee */}
                     <div className="space-y-2">
                       <label className="block text-sm font-medium text-gray-300 flex items-center">
-                        <DollarSign size={16} className="mr-2 text-gray-400" />
+                        <DollarSign size={16} className="mr-2 text-green-400" />
                         Course Fee
                       </label>
                       <div className="relative">
@@ -363,7 +375,7 @@ export default function CourseAdminForm() {
                           value={formData.courseFee}
                           onChange={handleInputChange}
                           placeholder="e.g., 149.99"
-                          className={`w-full p-3 rounded-lg bg-gray-900/80 border ${errors.courseFee ? 'border-red-500' : 'border-gray-700'} focus:border-blue-400 focus:ring-2 focus:ring-blue-400 focus:outline-none text-base`}
+                          className={`w-full p-3 rounded-lg bg-gray-900/80 border ${errors.courseFee ? 'border-red-500' : 'border-gray-700/50'} focus:border-green-400 focus:ring-2 focus:ring-green-400/30 focus:outline-none text-base transition-all`}
                         />
                         {errors.courseFee && (
                           <p className="mt-1 text-xs text-red-400 flex items-center">
@@ -377,8 +389,8 @@ export default function CourseAdminForm() {
                     {/* Course Name - Full width */}
                     <div className="space-y-2 md:col-span-2">
                       <label className="block text-sm font-medium text-gray-300 flex items-center">
-                        <Tag size={16} className="mr-2 text-gray-400" />
-                        Course Name
+                        <Tag size={16} className="mr-2 text-purple-400" />
+                        Course Name (no numbers allowed)
                       </label>
                       <div className="relative">
                         <input
@@ -387,7 +399,7 @@ export default function CourseAdminForm() {
                           value={formData.courseName}
                           onChange={handleInputChange}
                           placeholder="e.g., Advanced React Development"
-                          className={`w-full p-3 rounded-lg bg-gray-900/80 border ${errors.courseName ? 'border-red-500' : 'border-gray-700'} focus:border-blue-400 focus:ring-2 focus:ring-blue-400 focus:outline-none text-base`}
+                          className={`w-full p-3 rounded-lg bg-gray-900/80 border ${errors.courseName ? 'border-red-500' : 'border-gray-700/50'} focus:border-purple-400 focus:ring-2 focus:ring-purple-400/30 focus:outline-none text-base transition-all`}
                         />
                         {errors.courseName && (
                           <p className="mt-1 text-xs text-red-400 flex items-center">
@@ -401,7 +413,7 @@ export default function CourseAdminForm() {
                     {/* Duration */}
                     <div className="space-y-2 md:col-span-2">
                       <label className="block text-sm font-medium text-gray-300 flex items-center">
-                        <Clock size={16} className="mr-2 text-gray-400" />
+                        <Calendar size={16} className="mr-2 text-amber-400" />
                         Duration
                       </label>
                       <div className="relative">
@@ -409,7 +421,7 @@ export default function CourseAdminForm() {
                           name="duration"
                           value={formData.duration}
                           onChange={handleInputChange}
-                          className={`w-full p-3 rounded-lg bg-gray-900/80 border ${errors.duration ? 'border-red-500' : 'border-gray-700'} focus:border-blue-400 focus:ring-2 focus:ring-blue-400 focus:outline-none text-base`}
+                          className={`w-full p-3 rounded-lg bg-gray-900/80 border ${errors.duration ? 'border-red-500' : 'border-gray-700/50'} focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30 focus:outline-none text-base transition-all`}
                         >
                           <option value="">Select duration</option>
                           {durationOptions.map(option => (
@@ -428,7 +440,7 @@ export default function CourseAdminForm() {
                     {/* Description - Full width */}
                     <div className="space-y-2 md:col-span-2">
                       <label className="block text-sm font-medium text-gray-300 flex items-center">
-                        <FileText size={16} className="mr-2 text-gray-400" />
+                        <FileText size={16} className="mr-2 text-teal-400" />
                         Description
                       </label>
                       <div className="relative">
@@ -438,7 +450,7 @@ export default function CourseAdminForm() {
                           onChange={handleInputChange}
                           rows={4}
                           placeholder="Enter a detailed course description..."
-                          className={`w-full p-3 rounded-lg bg-gray-900/80 border ${errors.description ? 'border-red-500' : 'border-gray-700'} focus:border-blue-400 focus:ring-2 focus:ring-blue-400 focus:outline-none text-base`}
+                          className={`w-full p-3 rounded-lg bg-gray-900/80 border ${errors.description ? 'border-red-500' : 'border-gray-700/50'} focus:border-teal-400 focus:ring-2 focus:ring-teal-400/30 focus:outline-none text-base transition-all`}
                         />
                         {errors.description && (
                           <p className="mt-1 text-xs text-red-400 flex items-center">
@@ -453,13 +465,13 @@ export default function CourseAdminForm() {
                     <div className="space-y-3 md:col-span-2">
                       <div className="flex justify-between items-center">
                         <label className="block text-sm font-medium text-gray-300 flex items-center">
-                          <Briefcase size={16} className="mr-2 text-gray-400" />
+                          <Briefcase size={16} className="mr-2 text-indigo-400" />
                           Job Opportunities
                         </label>
                         <button
                           type="button"
                           onClick={addJobOpportunity}
-                          className="text-sm text-blue-400 hover:text-blue-300 flex items-center"
+                          className="text-sm text-blue-400 hover:text-blue-300 flex items-center bg-blue-500/10 px-2 py-1 rounded-md transition-colors"
                         >
                           <Plus size={16} className="mr-1" />
                           Add More
@@ -473,13 +485,13 @@ export default function CourseAdminForm() {
                             value={job}
                             onChange={(e) => handleJobOpportunityChange(index, e.target.value)}
                             placeholder={`e.g., Frontend Developer`}
-                            className={`flex-1 p-3 rounded-lg bg-gray-900/80 border ${errors.jobOpportunities && index === 0 ? 'border-red-500' : 'border-gray-700'} focus:border-blue-400 focus:ring-2 focus:ring-blue-400 focus:outline-none text-base`}
+                            className={`flex-1 p-3 rounded-lg bg-gray-900/80 border ${errors.jobOpportunities && index === 0 ? 'border-red-500' : 'border-gray-700/50'} focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 focus:outline-none text-base transition-all`}
                           />
                           {index > 0 && (
                             <button
                               type="button"
                               onClick={() => removeJobOpportunity(index)}
-                              className="p-2 rounded-lg hover:bg-gray-700 transition-colors"
+                              className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 transition-colors"
                             >
                               <X size={16} className="text-red-400" />
                             </button>
@@ -496,16 +508,16 @@ export default function CourseAdminForm() {
                     </div>
 
                     {/* Course Content/Modules - Full width */}
-                    <div className="space-y-4 md:col-span-2 border border-gray-700 rounded-lg p-4">
+                    <div className="space-y-4 md:col-span-2 border border-gray-700/50 rounded-lg p-4 bg-gray-800/30">
                       <div className="flex justify-between items-center">
                         <label className="block text-sm font-medium text-gray-300 flex items-center">
-                          <Layers size={16} className="mr-2 text-gray-400" />
+                          <Layers size={16} className="mr-2 text-rose-400" />
                           Course Content
                         </label>
                         <button
                           type="button"
                           onClick={addModule}
-                          className="text-sm text-blue-400 hover:text-blue-300 flex items-center"
+                          className="text-sm text-blue-400 hover:text-blue-300 flex items-center bg-blue-500/10 px-2 py-1 rounded-md transition-colors"
                         >
                           <Plus size={16} className="mr-1" />
                           Add Module
@@ -520,7 +532,7 @@ export default function CourseAdminForm() {
                       )}
                       
                       {courseModules.map((moduleItem, moduleIndex) => (
-                        <div key={moduleIndex} className="bg-gray-900/50 rounded-lg p-4 border border-gray-700 mb-4">
+                        <div key={moduleIndex} className="bg-gradient-to-r from-gray-900/80 to-gray-800/80 rounded-lg p-4 border border-gray-700/50 mb-4 shadow-md">
                           <div className="flex justify-between items-center mb-3">
                             <div className="flex-1">
                               <input
@@ -528,27 +540,27 @@ export default function CourseAdminForm() {
                                 value={moduleItem.module}
                                 onChange={(e) => handleModuleChange(moduleIndex, e.target.value)}
                                 placeholder="Module name (e.g., Introduction to React)"
-                                className="w-full p-2 rounded-lg bg-gray-800 border border-gray-700 focus:border-blue-400 focus:outline-none text-base"
+                                className="w-full p-2 rounded-lg bg-gray-800/70 border border-gray-700/50 focus:border-rose-400 focus:ring-2 focus:ring-rose-400/30 focus:outline-none text-base transition-all"
                               />
                             </div>
                             {moduleIndex > 0 && (
                               <button
                                 type="button"
                                 onClick={() => removeModule(moduleIndex)}
-                                className="ml-2 p-2 rounded-lg hover:bg-gray-700 transition-colors"
+                                className="ml-2 p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 transition-colors"
                               >
                                 <X size={16} className="text-red-400" />
                               </button>
                             )}
                           </div>
                           
-                          <div className="pl-4 border-l-2 border-blue-500/30">
+                          <div className="pl-4 border-l-2 border-blue-500/40">
                             <div className="flex justify-between items-center mb-2">
                               <h4 className="text-sm font-medium text-gray-400">Topics</h4>
                               <button
                                 type="button"
                                 onClick={() => addTopic(moduleIndex)}
-                                className="text-xs text-blue-400 hover:text-blue-300 flex items-center"
+                                className="text-xs text-blue-400 hover:text-blue-300 flex items-center bg-blue-500/10 px-2 py-1 rounded-md transition-colors"
                               >
                                 <Plus size={12} className="mr-1" />
                                 Add Topic
@@ -562,13 +574,13 @@ export default function CourseAdminForm() {
                                   value={topic}
                                   onChange={(e) => handleTopicChange(moduleIndex, topicIndex, e.target.value)}
                                   placeholder="Topic name (e.g., Components and Props)"
-                                  className="flex-1 p-2 rounded-lg bg-gray-800 border border-gray-700 focus:border-blue-400 focus:outline-none text-sm"
+                                  className="flex-1 p-2 rounded-lg bg-gray-800/50 border border-gray-700/50 focus:border-blue-400 focus:ring-2 focus:ring-blue-400/30 focus:outline-none text-sm transition-all"
                                 />
                                 {topicIndex > 0 && (
                                   <button
                                     type="button"
                                     onClick={() => removeTopic(moduleIndex, topicIndex)}
-                                    className="p-1 rounded-lg hover:bg-gray-700 transition-colors"
+                                    className="p-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 transition-colors"
                                   >
                                     <X size={14} className="text-red-400" />
                                   </button>
@@ -585,7 +597,7 @@ export default function CourseAdminForm() {
                   <div className="mt-8 flex justify-end">
                     <button
                       type="submit"
-                      className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-colors flex items-center font-medium"
+                      className="px-6 py-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 rounded-lg transition-all shadow-lg hover:shadow-blue-500/20 flex items-center font-medium"
                     >
                       <Save size={18} className="mr-2" />
                       Save Course
