@@ -34,9 +34,61 @@ export default function CourseEnrollmentForm() {
     setIsVisible(true);
   }, []);
   
-  // Handle input change
+  // Handle input change with validation
   const handleChange = (e) => {
     const { name, value } = e.target;
+    
+    // Apply input validations based on field name
+    if (name === 'fullName') {
+      // Only allow letters, spaces and basic punctuation (no numbers or operators)
+      if (/[0-9+\-*/%^=]/.test(value) && value !== '') {
+        return; // Don't update if contains numbers or operators
+      }
+    } 
+    else if (name === 'phoneNumber') {
+      // Only allow numbers and limit to 10 digits
+      const numbersOnly = value.replace(/\D/g, '');
+      if (numbersOnly.length > 10) {
+        return; // Don't update if more than 10 digits
+      }
+      // Update with numbers only
+      setFormData(prev => ({
+        ...prev,
+        [name]: numbersOnly
+      }));
+      
+      // Clear error for this field
+      if (errors[name]) {
+        setErrors(prev => ({
+          ...prev,
+          [name]: null
+        }));
+      }
+      return;
+    }
+    else if (name === 'nicNumber') {
+      // Only allow numbers and limit to 12 digits
+      const numbersOnly = value.replace(/\D/g, '');
+      if (numbersOnly.length > 12) {
+        return; // Don't update if more than 12 digits
+      }
+      // Update with numbers only
+      setFormData(prev => ({
+        ...prev,
+        [name]: numbersOnly
+      }));
+      
+      // Clear error for this field
+      if (errors[name]) {
+        setErrors(prev => ({
+          ...prev,
+          [name]: null
+        }));
+      }
+      return;
+    }
+    
+    // Default handling for other fields
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -56,6 +108,9 @@ export default function CourseEnrollmentForm() {
     const newErrors = {};
     
     if (!formData.fullName.trim()) newErrors.fullName = 'Full name is required';
+    else if (/[0-9+\-*/%^=]/.test(formData.fullName)) {
+      newErrors.fullName = 'Name cannot contain numbers or operators';
+    }
     
     if (!formData.emailAddress.trim()) {
       newErrors.emailAddress = 'Email is required';
@@ -63,12 +118,16 @@ export default function CourseEnrollmentForm() {
       newErrors.emailAddress = 'Email is invalid';
     }
     
-    if (!formData.nicNumber.trim()) newErrors.nicNumber = 'NIC is required';
+    if (!formData.nicNumber.trim()) {
+      newErrors.nicNumber = 'NIC is required';
+    } else if (formData.nicNumber.length !== 12) {
+      newErrors.nicNumber = 'NIC must be exactly 12 digits';
+    }
     
     if (!formData.phoneNumber.trim()) {
       newErrors.phoneNumber = 'Phone number is required';
-    } else if (!/^\d{10}$/.test(formData.phoneNumber.replace(/\D/g, ''))) {
-      newErrors.phoneNumber = 'Enter a valid phone number';
+    } else if (formData.phoneNumber.length !== 10) {
+      newErrors.phoneNumber = 'Phone number must be exactly 10 digits';
     }
     
     if (!formData.courseId) newErrors.courseId = 'Course ID is missing';
@@ -215,7 +274,7 @@ export default function CourseEnrollmentForm() {
                           className={`w-full py-3 pl-10 pr-3 bg-gray-900/90 border ${
                             errors.fullName ? 'border-red-500' : 'border-gray-700'
                           } rounded-lg focus:outline-none focus:border-blue-400 focus:ring-0 text-white transition-colors`}
-                          placeholder="Enter your full name"
+                          placeholder="Enter your full name (letters only)"
                         />
                       </div>
                     </div>
@@ -267,7 +326,8 @@ export default function CourseEnrollmentForm() {
                           className={`w-full py-3 pl-10 pr-3 bg-gray-900/90 border ${
                             errors.nicNumber ? 'border-red-500' : 'border-gray-700'
                           } rounded-lg focus:outline-none focus:border-blue-400 focus:ring-0 text-white transition-colors`}
-                          placeholder="Enter your NIC number"
+                          placeholder="Enter your NIC number (12 digits)"
+                          inputMode="numeric"
                         />
                       </div>
                     </div>
@@ -286,14 +346,15 @@ export default function CourseEnrollmentForm() {
                       <div className="relative flex items-center">
                         <Phone size={18} className="absolute left-3 text-gray-400" />
                         <input
-                          type="tel"
+                          type="text"
                           name="phoneNumber"
                           value={formData.phoneNumber}
                           onChange={handleChange}
                           className={`w-full py-3 pl-10 pr-3 bg-gray-900/90 border ${
                             errors.phoneNumber ? 'border-red-500' : 'border-gray-700'
                           } rounded-lg focus:outline-none focus:border-blue-400 focus:ring-0 text-white transition-colors`}
-                          placeholder="Enter your phone number"
+                          placeholder="Enter your phone number (10 digits)"
+                          inputMode="numeric"
                         />
                       </div>
                     </div>
