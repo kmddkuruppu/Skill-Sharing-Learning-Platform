@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 import { 
   BookOpen,
   DollarSign, 
@@ -16,9 +17,12 @@ import {
   Layers,
   List
 } from "lucide-react";
-import SuccessAlert from "../Components/SuccessAlert"; // Import the SuccessAlert component
+import SuccessAlert from "../Components/SuccessAlert";
 
 const LearningDashboard = () => {
+  // Add navigation
+  const navigate = useNavigate();
+  
   // State
   const [courses, setCourses] = useState([]);
   const [filteredCourses, setFilteredCourses] = useState([]);
@@ -109,7 +113,7 @@ const LearningDashboard = () => {
     setFilteredCourses(result);
   }, [searchTerm, selectedDuration, courses]);
 
-  // Handle form input changes
+  // Handle form input changes for Edit Course
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     
@@ -192,19 +196,9 @@ const LearningDashboard = () => {
     }
   };
 
-  // Open modal for adding new course
-  const openAddModal = () => {
-    setCurrentCourse(null);
-    setFormData({
-      courseId: generateCourseId(),
-      courseName: "",
-      courseFee: "",
-      description: "",
-      duration: "",
-      jobOpportunities: "",
-      courseContent: [{ module: "", topics: [""] }]
-    });
-    setIsModalOpen(true);
+  // Navigate to Add Course page
+  const goToAddCourse = () => {
+    navigate('/AddCourse');
   };
 
   // Open modal for editing course
@@ -237,12 +231,7 @@ const LearningDashboard = () => {
     }, 3000);
   };
 
-  // Generate a unique course ID
-  const generateCourseId = () => {
-    return 'COURSE_' + Date.now().toString().slice(-6);
-  };
-
-  // Handle form submission (add/update course)
+  // Handle form submission (update course)
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
     
@@ -252,10 +241,8 @@ const LearningDashboard = () => {
         ...formData
       };
       
-      let url = currentCourse 
-        ? `http://localhost:8080/api/learnings/${currentCourse.id}`
-        : 'http://localhost:8080/api/learnings';
-      let method = currentCourse ? 'PUT' : 'POST';
+      let url = `http://localhost:8080/api/learnings/${currentCourse.id}`;
+      let method = 'PUT';
       
       const response = await fetch(url, {
         method,
@@ -270,10 +257,7 @@ const LearningDashboard = () => {
       }
       
       // Show success alert
-      triggerSuccessAlert(
-        currentCourse ? "updated" : "added",
-        formData.courseName
-      );
+      triggerSuccessAlert("updated", formData.courseName);
       
       // Refresh courses after successful operation
       fetchCourses();
@@ -530,7 +514,7 @@ const LearningDashboard = () => {
               </button>
               
               <button 
-                onClick={openAddModal}
+                onClick={goToAddCourse}
                 className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg px-4 py-2 text-white font-medium shadow-lg shadow-blue-500/20"
               >
                 <Plus size={18} />
@@ -564,7 +548,7 @@ const LearningDashboard = () => {
               <FileText size={48} className="mx-auto mb-4 opacity-40" />
               <p className="text-lg">No courses found</p>
               <button 
-                onClick={openAddModal}
+                onClick={goToAddCourse}
                 className="mt-6 px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg text-white font-medium"
               >
                 Add Your First Course
@@ -580,12 +564,12 @@ const LearningDashboard = () => {
         </div>
       </div>
 
-      {/* Add/Edit Course Modal */}
+      {/* Edit Course Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-4xl shadow-2xl shadow-blue-500/10 max-h-screen overflow-y-auto">
             <h2 className="text-2xl font-bold text-blue-400 mb-6">
-              {currentCourse ? "Edit Course" : "Add New Course"}
+              Edit Course
             </h2>
             
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -599,7 +583,7 @@ const LearningDashboard = () => {
                     onChange={handleInputChange}
                     className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
-                    readOnly={currentCourse !== null}
+                    readOnly
                   />
                 </div>
                 
@@ -719,41 +703,42 @@ const LearningDashboard = () => {
                             <List size={14} className="text-gray-400 mr-2" />
                             <input
                               type="text"
-              value={topic}
-              onChange={(e) => handleTopicChange(moduleIndex, topicIndex, e.target.value)}
-              className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
-              placeholder="Topic"
-              required
-            />
-          </div>
-          {module.topics.length > 1 && (
-            <button
-              type="button"
-              onClick={() => removeTopic(moduleIndex, topicIndex)}
-              className="text-red-400 hover:text-red-300 ml-2 p-1"
-            >
-              <X size={14} />
-            </button>
-          )}
-        </div>
-      ))}
-      <button
-        type="button"
-        onClick={() => addTopic(moduleIndex)}
-        className="mt-2 flex items-center text-xs bg-gray-700 hover:bg-gray-600 transition-colors rounded-lg px-2 py-1 text-blue-400"
-      >
-        <Plus size={12} className="mr-1" /> Add Topic
-      </button>
-    </div>
-  </div>
-))}
+                              value={topic}
+                              onChange={(e) => handleTopicChange(moduleIndex, topicIndex, e.target.value)}
+                              className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                              placeholder="Topic"
+                              required
+                            />
+                          </div>
+                          {module.topics.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removeTopic(moduleIndex, topicIndex)}
+                              className="text-red-400 hover:text-red-300 ml-2 p-1"
+                            >
+                              <X size={14} />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                      
+                      <button
+                        type="button"
+                        onClick={() => addTopic(moduleIndex)}
+                        className="text-xs bg-gray-700 hover:bg-gray-600 text-blue-400 rounded-lg px-2 py-1 mt-2 flex items-center"
+                      >
+                        <Plus size={12} className="mr-1" /> Add Topic
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
               
-              <div className="flex justify-end space-x-4 pt-6 border-t border-gray-800">
+              <div className="flex justify-end space-x-4 pt-4 border-t border-gray-800">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-6 py-2 bg-gray-800 hover:bg-gray-700 transition-colors rounded-lg text-gray-300"
+                  className="px-6 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-gray-300"
                 >
                   Cancel
                 </button>
@@ -761,7 +746,7 @@ const LearningDashboard = () => {
                   type="submit"
                   className="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg text-white font-medium"
                 >
-                  {currentCourse ? "Update Course" : "Add Course"}
+                  Save Changes
                 </button>
               </div>
             </form>
