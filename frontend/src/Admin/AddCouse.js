@@ -80,8 +80,11 @@ export default function CourseAdminForm() {
   };
 
   const handleJobOpportunityChange = (index, value) => {
+    // Remove any numeric characters from job opportunity input
+    const textOnlyValue = value.replace(/[0-9]/g, '');
+    
     const updatedOpportunities = [...jobOpportunities];
-    updatedOpportunities[index] = value;
+    updatedOpportunities[index] = textOnlyValue;
     setJobOpportunities(updatedOpportunities);
     
     // Join job opportunities into a comma-separated string for backend
@@ -466,7 +469,7 @@ export default function CourseAdminForm() {
                       <div className="flex justify-between items-center">
                         <label className="block text-sm font-medium text-gray-300 flex items-center">
                           <Briefcase size={16} className="mr-2 text-indigo-400" />
-                          Job Opportunities
+                          Job Opportunities (no numbers allowed)
                         </label>
                         <button
                           type="button"
