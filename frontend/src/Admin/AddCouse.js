@@ -10,22 +10,26 @@ import {
   Tag,
   Briefcase,
   AlertCircle,
-  Check
+  Check,
+  Layers
 } from 'lucide-react';
 
-export default function CourseAdminForm({ onCourseSubmit }) {
+export default function CourseAdminForm() {
   const [isVisible, setIsVisible] = useState(false);
   const [jobOpportunities, setJobOpportunities] = useState(['']);
+  const [courseModules, setCourseModules] = useState([{ module: '', topics: [''] }]);
   const [formData, setFormData] = useState({
     courseId: '',
     courseName: '',
     courseFee: '',
     description: '',
     duration: '',
-    jobOpportunities: ['']
+    jobOpportunities: '',
+    courseContent: []
   });
   const [errors, setErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   // Duration options
   const durationOptions = [
@@ -40,10 +44,19 @@ export default function CourseAdminForm({ onCourseSubmit }) {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     
-    setFormData({
-      ...formData,
-      [name]: value
-    });
+    // Handle special case for courseFee to ensure it's a number
+    if (name === 'courseFee') {
+      const numericValue = value.replace(/[^0-9.]/g, '');
+      setFormData({
+        ...formData,
+        [name]: numericValue
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value
+      });
+    }
 
     // Clear error for this field if it exists
     if (errors[name]) {
@@ -59,9 +72,10 @@ export default function CourseAdminForm({ onCourseSubmit }) {
     updatedOpportunities[index] = value;
     setJobOpportunities(updatedOpportunities);
     
+    // Join job opportunities into a comma-separated string for backend
     setFormData({
       ...formData,
-      jobOpportunities: updatedOpportunities.filter(job => job.trim() !== '')
+      jobOpportunities: updatedOpportunities.filter(job => job.trim() !== '').join(', ')
     });
   };
 
@@ -74,9 +88,65 @@ export default function CourseAdminForm({ onCourseSubmit }) {
     updatedOpportunities.splice(index, 1);
     setJobOpportunities(updatedOpportunities);
     
+    // Update formData with the filtered and joined opportunities
     setFormData({
       ...formData,
-      jobOpportunities: updatedOpportunities.filter(job => job.trim() !== '')
+      jobOpportunities: updatedOpportunities.filter(job => job.trim() !== '').join(', ')
+    });
+  };
+
+  // Course Content/Modules Management
+  const handleModuleChange = (index, value) => {
+    const updatedModules = [...courseModules];
+    updatedModules[index].module = value;
+    setCourseModules(updatedModules);
+    updateCourseContent();
+  };
+
+  const handleTopicChange = (moduleIndex, topicIndex, value) => {
+    const updatedModules = [...courseModules];
+    updatedModules[moduleIndex].topics[topicIndex] = value;
+    setCourseModules(updatedModules);
+    updateCourseContent();
+  };
+
+  const addTopic = (moduleIndex) => {
+    const updatedModules = [...courseModules];
+    updatedModules[moduleIndex].topics.push('');
+    setCourseModules(updatedModules);
+  };
+
+  const removeTopic = (moduleIndex, topicIndex) => {
+    const updatedModules = [...courseModules];
+    updatedModules[moduleIndex].topics.splice(topicIndex, 1);
+    setCourseModules(updatedModules);
+    updateCourseContent();
+  };
+
+  const addModule = () => {
+    setCourseModules([...courseModules, { module: '', topics: [''] }]);
+  };
+
+  const removeModule = (index) => {
+    const updatedModules = [...courseModules];
+    updatedModules.splice(index, 1);
+    setCourseModules(updatedModules);
+    updateCourseContent();
+  };
+
+  const updateCourseContent = () => {
+    // Filter out empty modules and topics
+    const validModules = courseModules
+      .filter(mod => mod.module.trim() !== '')
+      .map(mod => ({
+        module: mod.module,
+        topics: mod.topics.filter(topic => topic.trim() !== '')
+      }))
+      .filter(mod => mod.topics.length > 0);
+
+    setFormData({
+      ...formData,
+      courseContent: validModules
     });
   };
 
@@ -85,17 +155,20 @@ export default function CourseAdminForm({ onCourseSubmit }) {
     
     if (!formData.courseId.trim()) newErrors.courseId = "Course ID is required";
     if (!formData.courseName.trim()) newErrors.courseName = "Course name is required";
-    if (!formData.courseFee.trim()) newErrors.courseFee = "Course fee is required";
+    if (!formData.courseFee.toString().trim()) newErrors.courseFee = "Course fee is required";
     if (!formData.description.trim()) newErrors.description = "Description is required";
     if (!formData.duration) newErrors.duration = "Duration is required";
     if (jobOpportunities.filter(job => job.trim() !== '').length === 0) {
       newErrors.jobOpportunities = "At least one job opportunity is required";
     }
+    if (formData.courseContent.length === 0) {
+      newErrors.courseContent = "At least one module with a topic is required";
+    }
     
     return newErrors;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     // Validate form
@@ -107,32 +180,50 @@ export default function CourseAdminForm({ onCourseSubmit }) {
     }
     
     // Prepare course data for submission
-    const newCourse = {
+    const courseData = {
       ...formData,
-      jobOpportunities: jobOpportunities.filter(job => job.trim() !== '')
+      courseFee: parseFloat(formData.courseFee)
     };
     
-    // Send to parent component
-    if (onCourseSubmit) {
-      onCourseSubmit(newCourse);
-    }
-    
-    // Show success message
-    setSuccessMessage('Course added successfully!');
-    
-    // Reset form after 3 seconds
-    setTimeout(() => {
-      setSuccessMessage('');
-      setFormData({
-        courseId: '',
-        courseName: '',
-        courseFee: '',
-        description: '',
-        duration: '',
-        jobOpportunities: ['']
+    try {
+      // Send data to backend
+      const response = await fetch('http://localhost:8080/api/learnings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(courseData)
       });
-      setJobOpportunities(['']);
-    }, 3000);
+      
+      if (!response.ok) {
+        throw new Error('Failed to save course');
+      }
+      
+      const result = await response.text();
+      
+      // Show success message
+      setSuccessMessage(result);
+      setErrorMessage('');
+      
+      // Reset form after 3 seconds
+      setTimeout(() => {
+        setSuccessMessage('');
+        setFormData({
+          courseId: '',
+          courseName: '',
+          courseFee: '',
+          description: '',
+          duration: '',
+          jobOpportunities: '',
+          courseContent: []
+        });
+        setJobOpportunities(['']);
+        setCourseModules([{ module: '', topics: [''] }]);
+      }, 3000);
+    } catch (error) {
+      setErrorMessage('Failed to save course: ' + error.message);
+      setSuccessMessage('');
+    }
   };
 
   const handleReset = () => {
@@ -142,10 +233,14 @@ export default function CourseAdminForm({ onCourseSubmit }) {
       courseFee: '',
       description: '',
       duration: '',
-      jobOpportunities: ['']
+      jobOpportunities: '',
+      courseContent: []
     });
     setJobOpportunities(['']);
+    setCourseModules([{ module: '', topics: [''] }]);
     setErrors({});
+    setSuccessMessage('');
+    setErrorMessage('');
   };
 
   return (
@@ -196,6 +291,14 @@ export default function CourseAdminForm({ onCourseSubmit }) {
                 </div>
               )}
 
+              {/* Error Message */}
+              {errorMessage && (
+                <div className="mx-6 mt-6 px-4 py-3 bg-red-500/20 border border-red-500 rounded-lg flex items-center">
+                  <AlertCircle size={18} className="text-red-400 mr-2" />
+                  <p className="text-red-400">{errorMessage}</p>
+                </div>
+              )}
+
               {/* Form Content */}
               <form onSubmit={handleSubmit} className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -235,7 +338,7 @@ export default function CourseAdminForm({ onCourseSubmit }) {
                         name="courseFee"
                         value={formData.courseFee}
                         onChange={handleInputChange}
-                        placeholder="e.g., $149.99"
+                        placeholder="e.g., 149.99"
                         className={`w-full p-3 rounded-lg bg-gray-900/80 border ${errors.courseFee ? 'border-red-500' : 'border-gray-700'} focus:border-blue-400 focus:ring-2 focus:ring-blue-400 focus:outline-none text-base`}
                       />
                       {errors.courseFee && (
@@ -367,6 +470,91 @@ export default function CourseAdminForm({ onCourseSubmit }) {
                       </p>
                     )}
                   </div>
+
+                  {/* Course Content/Modules - Full width */}
+                  <div className="space-y-4 md:col-span-2 border border-gray-700 rounded-lg p-4">
+                    <div className="flex justify-between items-center">
+                      <label className="block text-sm font-medium text-gray-300 flex items-center">
+                        <Layers size={16} className="mr-2 text-gray-400" />
+                        Course Content
+                      </label>
+                      <button
+                        type="button"
+                        onClick={addModule}
+                        className="text-sm text-blue-400 hover:text-blue-300 flex items-center"
+                      >
+                        <Plus size={16} className="mr-1" />
+                        Add Module
+                      </button>
+                    </div>
+                    
+                    {errors.courseContent && (
+                      <p className="mt-1 text-xs text-red-400 flex items-center">
+                        <AlertCircle size={12} className="mr-1" />
+                        {errors.courseContent}
+                      </p>
+                    )}
+                    
+                    {courseModules.map((moduleItem, moduleIndex) => (
+                      <div key={moduleIndex} className="bg-gray-900/50 rounded-lg p-4 border border-gray-700 mb-4">
+                        <div className="flex justify-between items-center mb-3">
+                          <div className="flex-1">
+                            <input
+                              type="text"
+                              value={moduleItem.module}
+                              onChange={(e) => handleModuleChange(moduleIndex, e.target.value)}
+                              placeholder="Module name (e.g., Introduction to React)"
+                              className="w-full p-2 rounded-lg bg-gray-800 border border-gray-700 focus:border-blue-400 focus:outline-none text-base"
+                            />
+                          </div>
+                          {moduleIndex > 0 && (
+                            <button
+                              type="button"
+                              onClick={() => removeModule(moduleIndex)}
+                              className="ml-2 p-2 rounded-lg hover:bg-gray-700 transition-colors"
+                            >
+                              <X size={16} className="text-red-400" />
+                            </button>
+                          )}
+                        </div>
+                        
+                        <div className="pl-4 border-l-2 border-blue-500/30">
+                          <div className="flex justify-between items-center mb-2">
+                            <h4 className="text-sm font-medium text-gray-400">Topics</h4>
+                            <button
+                              type="button"
+                              onClick={() => addTopic(moduleIndex)}
+                              className="text-xs text-blue-400 hover:text-blue-300 flex items-center"
+                            >
+                              <Plus size={12} className="mr-1" />
+                              Add Topic
+                            </button>
+                          </div>
+                          
+                          {moduleItem.topics.map((topic, topicIndex) => (
+                            <div key={topicIndex} className="flex items-center space-x-2 mb-2">
+                              <input
+                                type="text"
+                                value={topic}
+                                onChange={(e) => handleTopicChange(moduleIndex, topicIndex, e.target.value)}
+                                placeholder="Topic name (e.g., Components and Props)"
+                                className="flex-1 p-2 rounded-lg bg-gray-800 border border-gray-700 focus:border-blue-400 focus:outline-none text-sm"
+                              />
+                              {topicIndex > 0 && (
+                                <button
+                                  type="button"
+                                  onClick={() => removeTopic(moduleIndex, topicIndex)}
+                                  className="p-1 rounded-lg hover:bg-gray-700 transition-colors"
+                                >
+                                  <X size={14} className="text-red-400" />
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Submit Button - Full width */}
@@ -381,69 +569,6 @@ export default function CourseAdminForm({ onCourseSubmit }) {
                 </div>
               </form>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Preview Section */}
-      <section className="py-12 bg-gray-900">
-        <div className="container mx-auto px-6">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-2xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
-              Preview
-            </h2>
-
-            {/* Course Preview Card */}
-            {formData.courseName && (
-              <div className="bg-gray-800/60 backdrop-blur-sm rounded-xl overflow-hidden border border-gray-700 hover:border-blue-500 transition-all duration-300 p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <div className="text-xs font-medium text-blue-400 mb-1">
-                      ID: {formData.courseId || 'TBD'}
-                    </div>
-                    <h3 className="text-xl font-bold text-white mb-2">
-                      {formData.courseName}
-                    </h3>
-                  </div>
-                  <div className="text-blue-400 font-bold">
-                    {formData.courseFee || '$0.00'}
-                  </div>
-                </div>
-                
-                <p className="text-gray-400 text-sm mb-4">
-                  {formData.description || 'Course description will appear here...'}
-                </p>
-                
-                <div className="flex items-center text-sm text-gray-400 mb-4">
-                  <Clock size={16} className="mr-1.5" />
-                  <span>{formData.duration || 'Duration: TBD'}</span>
-                </div>
-                
-                {/* Job Opportunities */}
-                <div>
-                  <div className="flex items-center mb-2">
-                    <Briefcase size={16} className="text-blue-400 mr-2" />
-                    <h4 className="text-sm font-medium text-gray-300">Job Opportunities</h4>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {jobOpportunities.filter(job => job.trim() !== '').length > 0 ? (
-                      jobOpportunities
-                        .filter(job => job.trim() !== '')
-                        .map((job, i) => (
-                          <span 
-                            key={i} 
-                            className="bg-gray-700/60 px-3 py-1 rounded-full text-xs text-gray-300"
-                          >
-                            {job}
-                          </span>
-                        ))
-                    ) : (
-                      <span className="text-sm text-gray-500">No job opportunities specified</span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </section>
