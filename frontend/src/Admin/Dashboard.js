@@ -295,7 +295,7 @@ const AdminDashboard = () => {
       name: "Udesha",
       title: "Learning Progress Management",
       icon: <Briefcase />,
-      link: "/team/udesha",
+      link: "/viewprogress",
       bgColor: "bg-gray-900",
       accentColor: "amber"
     }
