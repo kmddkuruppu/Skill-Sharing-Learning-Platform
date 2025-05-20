@@ -26,7 +26,7 @@ export default function Navigation() {
   const navLinks = [
     { name: 'Explore', href: '/course' },
     { name: 'Categories', href: '#' },
-    { name: 'Teach', href: '#' },
+    { name: 'Success Journeys', href: '/success' },
     { name: 'Community', href: '#' }
   ];
   
