@@ -24,11 +24,12 @@ import ViewContact from './Admin/ViewContact';
 import ViewCourse from './Admin/ViewCourse'
 import ViewEndrollment from './Admin/ViewEnrollment';
 import ViewSkill from './Admin/ViewSkill';
+import ViewProgress from './Admin/ViewProgress';
 
 // layout wrapper to handle conditional Nav/Footer
 function LayoutWrapper() {
   const location = useLocation();
-  const hideLayout = ['/viewcourse', '/dashboard' , '/viewcontact' , '/viewenrollment' , '/viewskill'].includes(location.pathname.toLowerCase());
+  const hideLayout = ['/viewcourse', '/dashboard' , '/viewcontact' , '/viewenrollment' , '/viewskill' , '/viewprogress'].includes(location.pathname.toLowerCase());
 
   return (
     <>
@@ -55,6 +56,7 @@ function LayoutWrapper() {
         <Route path='/viewcontact' element={<ViewContact />} />
         <Route path='/viewenrollment' element={<ViewEndrollment />} />
         <Route path='/viewskill' element={<ViewSkill />} />
+        <Route path='/viewprogress' element={<ViewProgress />} />
       </Routes>
       {!hideLayout && <Footer />}
     </>
