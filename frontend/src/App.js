@@ -15,6 +15,7 @@ import Community from './User/Community';
 import Enrollment from './User/Enrollment';
 import AddSkill from './User/AddSkill';
 import Skill from './User/Skill';
+import Progress from './User/Progress';
 
 // import Admin pages
 import AddCouse from './Admin/AddCouse';
@@ -23,11 +24,12 @@ import ViewContact from './Admin/ViewContact';
 import ViewCourse from './Admin/ViewCourse'
 import ViewEndrollment from './Admin/ViewEnrollment';
 import ViewSkill from './Admin/ViewSkill';
+import ViewProgress from './Admin/ViewProgress';
 
 // layout wrapper to handle conditional Nav/Footer
 function LayoutWrapper() {
   const location = useLocation();
-  const hideLayout = ['/viewcourse', '/dashboard' , '/viewcontact' , '/viewenrollment' , '/viewskill'].includes(location.pathname.toLowerCase());
+  const hideLayout = ['/viewcourse', '/dashboard' , '/viewcontact' , '/viewenrollment' , '/viewskill' , '/viewprogress'].includes(location.pathname.toLowerCase());
 
   return (
     <>
@@ -45,6 +47,7 @@ function LayoutWrapper() {
         <Route path='/enrollment' element={<Enrollment />} />
         <Route path='/addskill' element={<AddSkill />} />
         <Route path='/skill' element={<Skill />} />
+        <Route path='/progress' element={<Progress />} />
 
         {/* Admin */}
         <Route path='/addcourse' element={<AddCouse />} />
@@ -53,6 +56,7 @@ function LayoutWrapper() {
         <Route path='/viewcontact' element={<ViewContact />} />
         <Route path='/viewenrollment' element={<ViewEndrollment />} />
         <Route path='/viewskill' element={<ViewSkill />} />
+        <Route path='/viewprogress' element={<ViewProgress />} />
       </Routes>
       {!hideLayout && <Footer />}
     </>
