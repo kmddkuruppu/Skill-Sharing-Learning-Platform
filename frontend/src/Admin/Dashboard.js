@@ -287,7 +287,7 @@ const AdminDashboard = () => {
       name: "Chamodi",
       title: "Skill Sharing Management",
       icon: <Book />,
-      link: "/team/chamodi",
+      link: "/viewskill",
       bgColor: "bg-gray-900",
       accentColor: "emerald"
     },
