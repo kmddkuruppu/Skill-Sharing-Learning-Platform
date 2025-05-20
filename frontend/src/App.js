@@ -18,7 +18,6 @@ import Skill from './User/Skill';
 
 // import Admin pages
 import AddCouse from './Admin/AddCouse';
-import Skill from './Admin/Skill';
 import Dashboard from './Admin/Dashboard';
 import ViewContact from './Admin/ViewContact';
 import ViewCourse from './Admin/ViewCourse'
@@ -28,7 +27,7 @@ import ViewSkill from './Admin/ViewSkill';
 // layout wrapper to handle conditional Nav/Footer
 function LayoutWrapper() {
   const location = useLocation();
-  const hideLayout = ['/viewcourse', '/skill' , '/dashboard' , '/viewcontact' , '/viewenrollment' , '/viewskill'].includes(location.pathname.toLowerCase());
+  const hideLayout = ['/viewcourse', '/dashboard' , '/viewcontact' , '/viewenrollment' , '/viewskill'].includes(location.pathname.toLowerCase());
 
   return (
     <>
@@ -49,7 +48,6 @@ function LayoutWrapper() {
 
         {/* Admin */}
         <Route path='/addcourse' element={<AddCouse />} />
-        <Route path='/skill' element={<Skill />} />
         <Route path='/dashboard' element={<Dashboard />} />
         <Route path='/viewcourse' element={<ViewCourse />} />
         <Route path='/viewcontact' element={<ViewContact />} />
