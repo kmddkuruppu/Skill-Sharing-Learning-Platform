@@ -27,7 +27,7 @@ export default function Navigation() {
     { name: 'Explore', href: '/course' },
     { name: 'Categories', href: '#' },
     { name: 'Success Journeys', href: '/success' },
-    { name: 'Community', href: '#' }
+    { name: 'Progress', href: '/progress' }
   ];
   
   const categories = [
