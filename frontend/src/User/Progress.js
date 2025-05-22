@@ -1,123 +1,105 @@
 import { useState, useEffect } from 'react';
-import { 
-  TrendingUp, Clock, Briefcase, User, Star, 
-  Award, BookOpen, CheckCircle, ChevronRight,
-  BarChart2, Loader2, Shield, AlertCircle
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell
+} from 'recharts';
+import {
+  Award,
+  BookOpen,
+  ChevronRight,
+  Check,
+  Clock,
+  Filter,
+  GraduationCap,
+  Loader2,
+  Search,
+  Sparkles,
+  TrendingUp,
+  RefreshCw,
+  AlertTriangle,
+  BadgeCheck,
+  ShieldCheck,
+  Star
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
 export default function SkillProgressDashboard() {
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [progressData, setProgressData] = useState([]);
-  const [courses, setCourses] = useState([]);
-  const [activeTab, setActiveTab] = useState('inProgress');
-
-  // For demo purpose - In a real app this would come from auth context/state
-  const mockUserId = "user123";
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [activeFilter, setActiveFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedProgress, setSelectedProgress] = useState(null);
+  const [isVisible, setIsVisible] = useState(false);
   
-  // Fetch user's progress data from the backend
+  // Filter options
+  const filters = [
+    { id: 'all', name: 'All Progress', icon: <Sparkles size={16} className="mr-1.5" /> },
+    { id: 'certificate', name: 'Certificate Eligible', icon: <Award size={16} className="mr-1.5" /> },
+    { id: 'in-progress', name: 'In Progress', icon: <Clock size={16} className="mr-1.5" /> },
+    { id: 'completed', name: 'Completed', icon: <Check size={16} className="mr-1.5" /> }
+  ];
+
+  // Random color generator for charts
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
+  const getRandomColor = () => COLORS[Math.floor(Math.random() * COLORS.length)];
+
+  // Format percentage for display
+  const formatPercentage = (percentage) => {
+    return `${percentage.toFixed(1)}%`;
+  };
+
+  // Fetch progress data from the API
   useEffect(() => {
     const fetchProgressData = async () => {
       try {
-        setLoading(true);
-        const response = await fetch(`http://localhost:8080/api/progress/user/${mockUserId}`);
+        setIsLoading(true);
+        const response = await fetch('http://localhost:8080/api/progress');
         
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
         
         const data = await response.json();
-        setProgressData(data);
+        
+        // Transform data for our component
+        const transformedData = data.map(progress => ({
+          id: progress.id,
+          userId: progress.userId,
+          courseId: progress.courseId,
+          completedModules: progress.completedModules || [],
+          totalModules: progress.totalModules,
+          progressPercentage: progress.progressPercentage,
+          isCertificateEligible: progress.isCertificateEligible,
+          badgesEarned: progress.badgesEarned || [],
+          feedback: progress.feedback || 'No feedback available yet.',
+          // Add visual properties for the cards
+          colorClass: getRandomColorClass(),
+          status: getProgressStatus(progress.progressPercentage)
+        }));
+        
+        setProgressData(transformedData);
+        setError(null);
       } catch (err) {
         setError(`Failed to fetch progress data: ${err.message}`);
         console.error("Error fetching progress data:", err);
-        
-        // For demo purposes, load mock data if the API call fails
-        const mockProgress = [
-          {
-            id: "prog1",
-            userId: "user123",
-            courseId: "CS101",
-            completedModules: ["mod1", "mod2", "mod3"],
-            totalModules: 8,
-            progressPercentage: 37.5,
-            isCertificateEligible: false,
-            badgesEarned: ["Quick Learner", "Perfect Quiz"],
-            feedback: "Great progress so far! Focus on completing module 4 this week."
-          },
-          {
-            id: "prog2",
-            userId: "user123",
-            courseId: "CS102",
-            completedModules: ["mod1", "mod2", "mod3", "mod4", "mod5", "mod6", "mod7", "mod8", "mod9", "mod10"],
-            totalModules: 10,
-            progressPercentage: 100.0,
-            isCertificateEligible: true,
-            badgesEarned: ["Course Completed", "All Star", "Perfect Attendance"],
-            feedback: "Congratulations on completing the course with excellent results!"
-          }
-        ];
-        
-        setProgressData(mockProgress);
       } finally {
-        setLoading(false);
-      }
-    };
-    
-    // Fetch courses data (similar to what we had in CoursesDisplayWall)
-    const fetchCourses = async () => {
-      try {
-        const response = await fetch('http://localhost:8080/api/learnings');
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        
-        // Transform the data
-        const transformedData = data.map(course => ({
-          id: course.id,
-          courseId: course.courseId,
-          courseName: course.courseName,
-          description: course.description,
-          duration: course.duration,
-          colorClass: getRandomColorClass()
-        }));
-        
-        setCourses(transformedData);
-      } catch (err) {
-        console.error("Error fetching courses:", err);
-        
-        // Mock data if API fails
-        setCourses([
-          {
-            id: "1",
-            courseId: "CS101",
-            courseName: "Introduction to Web Development",
-            description: "Learn the fundamentals of web development including HTML, CSS and JavaScript.",
-            duration: "8 weeks",
-            colorClass: getRandomColorClass()
-          },
-          {
-            id: "2",
-            courseId: "CS102",
-            courseName: "React.js Fundamentals",
-            description: "Build modern user interfaces with React, the popular JavaScript library.",
-            duration: "10 weeks",
-            colorClass: getRandomColorClass()
-          }
-        ]);
+        setIsLoading(false);
       }
     };
     
     fetchProgressData();
-    fetchCourses();
+    setIsVisible(true);
   }, []);
-  
-  // Generate a random tailwind color class for cards
+
+  // Generate random color class for cards (matching the theme)
   const getRandomColorClass = () => {
     const colors = [
       'from-blue-500 to-purple-600',
@@ -128,162 +110,258 @@ export default function SkillProgressDashboard() {
       'from-sky-400 to-indigo-500'
     ];
     return colors[Math.floor(Math.random() * colors.length)];
-  }
-  
-  // Find course details by courseId
-  const getCourseDetails = (courseId) => {
-    return courses.find(course => course.courseId === courseId) || {
-      courseName: 'Unknown Course',
-      description: 'Course details not available',
-      colorClass: 'from-gray-500 to-gray-600'
-    };
   };
-  
-  // Filter progress data based on active tab
+
+  // Determine progress status based on percentage
+  const getProgressStatus = (percentage) => {
+    if (percentage >= 100) return 'completed';
+    if (percentage >= 80) return 'advanced';
+    if (percentage >= 50) return 'intermediate';
+    return 'beginner';
+  };
+
+  // Filter the progress data based on selected filter and search
   const filteredProgressData = progressData.filter(progress => {
-    if (activeTab === 'inProgress') {
-      return progress.progressPercentage < 100;
-    } else if (activeTab === 'completed') {
-      return progress.progressPercentage === 100;
+    // Apply filter
+    if (activeFilter === 'certificate' && !progress.isCertificateEligible) return false;
+    if (activeFilter === 'completed' && progress.progressPercentage < 100) return false;
+    if (activeFilter === 'in-progress' && progress.progressPercentage >= 100) return false;
+    
+    // Apply search
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      return (
+        progress.courseId.toLowerCase().includes(query) ||
+        progress.userId.toLowerCase().includes(query) ||
+        (progress.feedback && progress.feedback.toLowerCase().includes(query))
+      );
     }
-    return true; // 'all' tab
+    
+    return true;
   });
-  
-  // Handle updating module completion status
-  const handleModuleCompletion = async (progressId, moduleId, isCompleted) => {
-    // Find the current progress item
-    const currentProgress = progressData.find(item => item.id === progressId);
-    if (!currentProgress) return;
-    
-    // Create updated list of completed modules
-    let updatedModules = [...currentProgress.completedModules];
-    
-    if (isCompleted && !updatedModules.includes(moduleId)) {
-      // Add the module to completed list
-      updatedModules.push(moduleId);
-    } else if (!isCompleted && updatedModules.includes(moduleId)) {
-      // Remove the module from completed list
-      updatedModules = updatedModules.filter(mod => mod !== moduleId);
-    } else {
-      // No change needed
-      return;
-    }
-    
-    // Calculate new progress percentage
-    const newPercentage = (updatedModules.length / currentProgress.totalModules) * 100;
-    
-    // Prepare updated progress object
-    const updatedProgress = {
-      ...currentProgress,
-      completedModules: updatedModules,
-      progressPercentage: newPercentage,
-      isCertificateEligible: newPercentage === 100
-    };
-    
+
+  // Handle view details
+  const handleViewDetails = (progress) => {
+    setSelectedProgress(progress);
+  };
+
+  // Close details panel
+  const handleCloseDetails = () => {
+    setSelectedProgress(null);
+  };
+
+  // Handle refresh
+  const handleRefresh = async () => {
+    setIsLoading(true);
     try {
-      // Send update to the backend
-      const response = await fetch(`http://localhost:8080/api/progress/${progressId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedProgress),
-      });
+      const response = await fetch('http://localhost:8080/api/progress');
+      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+      const data = await response.json();
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
+      const transformedData = data.map(progress => ({
+        id: progress.id,
+        userId: progress.userId,
+        courseId: progress.courseId,
+        completedModules: progress.completedModules || [],
+        totalModules: progress.totalModules,
+        progressPercentage: progress.progressPercentage,
+        isCertificateEligible: progress.isCertificateEligible,
+        badgesEarned: progress.badgesEarned || [],
+        feedback: progress.feedback || 'No feedback available yet.',
+        colorClass: getRandomColorClass(),
+        status: getProgressStatus(progress.progressPercentage)
+      }));
       
-      // Update local state with the new progress data
-      setProgressData(progressData.map(item => 
-        item.id === progressId ? updatedProgress : item
-      ));
-      
-    } catch (error) {
-      console.error('Error updating progress:', error);
-      alert('Failed to update your progress. Please try again.');
+      setProgressData(transformedData);
+      setError(null);
+    } catch (err) {
+      setError(`Failed to refresh: ${err.message}`);
+    } finally {
+      setIsLoading(false);
     }
   };
-  
-  // Handle certificate download/view
-  const handleViewCertificate = (courseId) => {
-    alert(`Certificate for course ${courseId} will be displayed in a modal or downloaded`);
-    // In a real app, this would open a modal with certificate preview or download
+
+  // Generate module data for chart
+  const getModuleChartData = (progress) => {
+    if (!progress) return [];
+    
+    return [
+      { name: 'Completed', value: progress.completedModules.length },
+      { name: 'Remaining', value: progress.totalModules - progress.completedModules.length }
+    ];
   };
-  
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-gray-950 text-gray-100">
       {/* Header Section */}
-      <header className="py-16 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-900/20 via-purple-900/20 to-blue-900/20"></div>
+      <header className="py-12 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-900/20 via-purple-900/20 to-blue-900/20 animate-gradient-x"></div>
+        
+        {/* Animated particles */}
+        <div className="absolute inset-0 overflow-hidden">
+          {[...Array(20)].map((_, i) => (
+            <div 
+              key={i}
+              className="absolute rounded-full bg-blue-500/20 animate-pulse"
+              style={{
+                width: `${Math.random() * 10 + 5}px`,
+                height: `${Math.random() * 10 + 5}px`,
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+                animationDuration: `${Math.random() * 4 + 2}s`,
+                animationDelay: `${Math.random() * 2}s`
+              }}
+            ></div>
+          ))}
+        </div>
         
         <div className="container mx-auto px-6 relative z-10">
-          <div className="max-w-3xl mx-auto text-center">
-            <div className="mb-8 flex justify-center">
+          <div className="text-center max-w-3xl mx-auto">
+            <div className="mb-6 flex justify-center">
               <div className="p-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-600">
-                <BarChart2 size={36} className="text-white" />
+                <TrendingUp size={32} className="text-white" />
               </div>
             </div>
             
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
-                Your Learning Journey
+                Skills Progress Dashboard
               </span>
             </h1>
             
-            <p className="text-xl text-gray-300 mb-10 leading-relaxed">
-              Track your progress, earn certificates, and continue mastering new skills
+            <p className="text-lg text-gray-300 mb-8 leading-relaxed">
+              Track your learning journey, monitor progress, and earn badges as you master new skills
             </p>
+            
+            {/* Search Bar */}
+            <div className="relative max-w-xl mx-auto mb-8 group">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full opacity-0 group-focus-within:opacity-100 transition duration-300 blur"></div>
+              <div className="relative">
+                <Search className="absolute left-4 top-3.5 text-gray-400" size={20} />
+                <input 
+                  type="text" 
+                  placeholder="Search by course ID, user ID or feedback..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full py-3.5 pl-12 pr-4 rounded-full bg-gray-800/80 backdrop-blur-sm border border-gray-700 focus:border-blue-400 focus:ring-0 focus:outline-none text-base shadow-lg transition-all duration-300"
+                />
+              </div>
+            </div>
+            
+            {/* Overall Stats */}
+            {!isLoading && !error && progressData.length > 0 && (
+              <div className="flex flex-wrap justify-center gap-4 mt-6">
+                <div className="flex items-center bg-gray-800/50 backdrop-blur-sm px-4 py-2 rounded-xl border border-gray-700">
+                  <div className="mr-3">
+                    <BookOpen size={24} className="text-blue-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">Total Courses</p>
+                    <p className="text-lg font-bold">{new Set(progressData.map(p => p.courseId)).size}</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center bg-gray-800/50 backdrop-blur-sm px-4 py-2 rounded-xl border border-gray-700">
+                  <div className="mr-3">
+                    <Star size={24} className="text-yellow-400" fill="#FBBF24" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">Avg. Completion</p>
+                    <p className="text-lg font-bold">
+                      {(progressData.reduce((sum, p) => sum + p.progressPercentage, 0) / progressData.length).toFixed(1)}%
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center bg-gray-800/50 backdrop-blur-sm px-4 py-2 rounded-xl border border-gray-700">
+                  <div className="mr-3">
+                    <GraduationCap size={24} className="text-green-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">Certificate Eligible</p>
+                    <p className="text-lg font-bold">
+                      {progressData.filter(p => p.isCertificateEligible).length}
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center bg-gray-800/50 backdrop-blur-sm px-4 py-2 rounded-xl border border-gray-700">
+                  <div className="mr-3">
+                    <Award size={24} className="text-purple-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">Total Badges</p>
+                    <p className="text-lg font-bold">
+                      {progressData.reduce((sum, p) => sum + (p.badgesEarned?.length || 0), 0)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </header>
 
-      {/* Progress Tab Navigation */}
-      <section className="bg-gray-800/30 backdrop-blur-md sticky top-0 z-10 border-y border-gray-700/50 shadow-lg">
+      {/* Filters */}
+      <section className="py-4 bg-gray-800/30 backdrop-blur-md sticky top-0 z-10 border-y border-gray-700/50 shadow-lg">
         <div className="container mx-auto px-6">
-          <div className="flex items-center justify-center">
-            <div className="flex space-x-2 py-4">
-              {[
-                { id: 'all', label: 'All Courses', icon: <BookOpen size={16} className="mr-1.5" /> },
-                { id: 'inProgress', label: 'In Progress', icon: <TrendingUp size={16} className="mr-1.5" /> },
-                { id: 'completed', label: 'Completed', icon: <CheckCircle size={16} className="mr-1.5" /> }
-              ].map(tab => (
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <Filter size={18} className="text-blue-400 mr-3" />
+              <span className="text-gray-300 mr-4 hidden md:block font-medium">Filter by:</span>
+            </div>
+            
+            <div className="flex overflow-x-auto pb-2 space-x-2 scrollbar-hide flex-grow">
+              {filters.map(filter => (
                 <button 
-                  key={tab.id}
+                  key={filter.id}
                   className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all flex items-center ${
-                    activeTab === tab.id 
+                    activeFilter === filter.id 
                       ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/20' 
                       : 'bg-gray-800/60 text-gray-300 hover:bg-gray-700/80 border border-gray-700/50'
                   }`}
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => setActiveFilter(filter.id)}
                 >
-                  {tab.icon}
-                  {tab.label}
+                  {filter.icon}
+                  {filter.name}
                 </button>
               ))}
             </div>
+            
+            <button 
+              onClick={handleRefresh}
+              className="ml-2 p-2 rounded-full bg-gray-800/60 text-gray-300 hover:bg-gray-700/80 border border-gray-700/50 transition-all"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <Loader2 size={18} className="animate-spin" />
+              ) : (
+                <RefreshCw size={18} />
+              )}
+            </button>
           </div>
         </div>
       </section>
 
-      {/* Main Content Section */}
-      <section className="py-16">
+      {/* Main Content */}
+      <section className="py-8 bg-gradient-to-b from-gray-900 to-gray-900/50">
         <div className="container mx-auto px-6">
-          {loading ? (
+          {isLoading ? (
             <div className="flex justify-center items-center py-20">
               <div className="relative">
                 <div className="absolute -inset-4 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 opacity-50 blur-lg animate-pulse"></div>
                 <Loader2 size={40} className="animate-spin text-white relative" />
               </div>
-              <span className="ml-4 text-xl">Loading your progress...</span>
+              <span className="ml-4 text-xl">Loading progress data...</span>
             </div>
           ) : error ? (
             <div className="text-center py-20">
               <div className="bg-red-900/30 backdrop-blur-sm rounded-xl p-8 max-w-lg mx-auto border border-red-700">
-                <h3 className="text-xl font-semibold mb-3">Error Loading Progress Data</h3>
+                <AlertTriangle size={32} className="mx-auto mb-4 text-red-400" />
+                <h3 className="text-xl font-semibold mb-3">Error Loading Data</h3>
                 <p className="text-gray-300 mb-6">{error}</p>
                 <button 
-                  onClick={() => window.location.reload()}
+                  onClick={handleRefresh}
                   className="px-6 py-2 bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors"
                 >
                   Retry
@@ -291,179 +369,325 @@ export default function SkillProgressDashboard() {
               </div>
             </div>
           ) : filteredProgressData.length > 0 ? (
-            <div className="space-y-10">
-              {filteredProgressData.map((progress) => {
-                const course = getCourseDetails(progress.courseId);
-                return (
-                  <div key={progress.id} className="bg-gray-800/40 backdrop-blur-sm rounded-xl border border-gray-700/50 overflow-hidden">
-                    {/* Course Header */}
-                    <div className={`bg-gradient-to-r ${course.colorClass} p-6`}>
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <h2 className="text-2xl font-bold mb-2">{course.courseName}</h2>
-                          <p className="text-gray-200 text-sm">{course.description}</p>
-                        </div>
-                        <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-lg">
-                          <div className="text-xs text-white/70 mb-1">Progress</div>
-                          <div className="text-2xl font-bold">{progress.progressPercentage.toFixed(0)}%</div>
-                        </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredProgressData.map((progress, index) => (
+                <div 
+                  key={progress.id}
+                  className={`relative rounded-xl overflow-hidden border border-gray-700/50 hover:border-blue-500/80 transition-all duration-500 transform ${
+                    isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                  } hover:-translate-y-2 group`}
+                  style={{ transitionDelay: `${index * 80}ms` }}
+                >
+                  {/* Progress Card Top Gradient Bar */}
+                  <div className={`h-2 w-full bg-gradient-to-r ${progress.colorClass}`}></div>
+                  
+                  {/* Animated Background */}
+                  <div className="absolute inset-0 bg-gray-800/90 backdrop-blur-sm z-0">
+                    <div className={`absolute inset-0 bg-gradient-to-br ${progress.colorClass} opacity-5 group-hover:opacity-10 transition-opacity duration-500`}></div>
+                  </div>
+                  
+                  {/* Progress Content */}
+                  <div className="p-6 space-y-4 relative z-10">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors">
+                          Course ID: {progress.courseId}
+                        </h3>
+                        <p className="text-gray-400 text-sm">User: {progress.userId}</p>
+                      </div>
+                      
+                      <div className={`text-white font-bold py-1 px-3 rounded-full text-sm bg-gradient-to-r ${progress.colorClass}`}>
+                        {formatPercentage(progress.progressPercentage)}
                       </div>
                     </div>
                     
                     {/* Progress Bar */}
-                    <div className="px-6 py-4 border-b border-gray-700/50">
-                      <div className="w-full h-4 bg-gray-700 rounded-full overflow-hidden">
-                        <div 
-                          className={`h-full bg-gradient-to-r ${course.colorClass}`}
-                          style={{ width: `${progress.progressPercentage}%` }}
-                        ></div>
+                    <div className="w-full bg-gray-700/50 rounded-full h-3 overflow-hidden">
+                      <div 
+                        className={`h-3 rounded-full bg-gradient-to-r ${progress.colorClass}`}
+                        style={{ width: `${progress.progressPercentage}%` }}
+                      ></div>
+                    </div>
+                    
+                    <div className="flex items-center flex-wrap gap-2">
+                      <div className="bg-gray-900/80 backdrop-blur-sm px-2.5 py-1.5 rounded-full text-xs font-medium flex items-center">
+                        <BookOpen size={14} className="text-blue-400 mr-1.5" />
+                        {progress.completedModules.length}/{progress.totalModules} modules
+                      </div>
+                      
+                      {progress.isCertificateEligible && (
+                        <div className="bg-green-500/20 text-green-300 px-2.5 py-1.5 rounded-full text-xs font-medium flex items-center border border-green-500/30">
+                          <ShieldCheck size={14} className="mr-1.5" />
+                          Certificate Eligible
+                        </div>
+                      )}
+                      
+                      <div className={`px-2.5 py-1.5 rounded-full text-xs font-medium flex items-center
+                        ${progress.status === 'completed' ? 'bg-green-500/20 text-green-300 border border-green-500/30' : 
+                          progress.status === 'advanced' ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' :
+                          progress.status === 'intermediate' ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30' :
+                          'bg-purple-500/20 text-purple-300 border border-purple-500/30'}
+                      `}>
+                        <Sparkles size={14} className="mr-1.5" />
+                        {progress.status.charAt(0).toUpperCase() + progress.status.slice(1)}
                       </div>
                     </div>
                     
-                    {/* Course Info and Badges */}
-                    <div className="px-6 py-4 grid grid-cols-1 md:grid-cols-3 gap-6">
-                      {/* Course Stats */}
-                      <div className="col-span-1 space-y-4">
-                        <h3 className="text-lg font-semibold mb-3">Course Stats</h3>
-                        
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between bg-gray-700/30 p-3 rounded-lg">
-                            <div className="flex items-center">
-                              <BookOpen size={18} className="text-blue-400 mr-2" />
-                              <span>Modules</span>
-                            </div>
-                            <span className="font-medium">{progress.completedModules.length} / {progress.totalModules}</span>
-                          </div>
-                          
-                          <div className="flex items-center justify-between bg-gray-700/30 p-3 rounded-lg">
-                            <div className="flex items-center">
-                              <Award size={18} className="text-purple-400 mr-2" />
-                              <span>Badges</span>
-                            </div>
-                            <span className="font-medium">{progress.badgesEarned.length}</span>
-                          </div>
-                          
-                          <div className="flex items-center justify-between bg-gray-700/30 p-3 rounded-lg">
-                            <div className="flex items-center">
-                              <Shield size={18} className="text-green-400 mr-2" />
-                              <span>Certificate</span>
-                            </div>
-                            <span className={`font-medium ${progress.isCertificateEligible ? 'text-green-400' : 'text-gray-400'}`}>
-                              {progress.isCertificateEligible ? 'Available' : 'Not Eligible'}
+                    {/* Badges */}
+                    {progress.badgesEarned && progress.badgesEarned.length > 0 && (
+                      <div className="pt-2">
+                        <div className="flex items-center mb-2">
+                          <BadgeCheck size={16} className="text-blue-400 mr-2" />
+                          <h4 className="text-sm font-medium text-gray-300">Badges Earned</h4>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {progress.badgesEarned.map((badge, i) => (
+                            <span 
+                              key={i} 
+                              className="bg-gray-700/60 backdrop-blur-sm border border-gray-600/30 px-3 py-1 rounded-full text-xs text-gray-300"
+                            >
+                              {badge}
                             </span>
-                          </div>
-                        </div>
-                        
-                        {progress.isCertificateEligible && (
-                          <button 
-                            onClick={() => handleViewCertificate(progress.courseId)}
-                            className={`w-full mt-4 py-2 rounded-lg bg-gradient-to-r ${course.colorClass} flex items-center justify-center`}
-                          >
-                            <Award size={18} className="mr-2" />
-                            View Certificate
-                          </button>
-                        )}
-                      </div>
-                      
-                      {/* Feedback Section */}
-                      <div className="col-span-2 space-y-4">
-                        {progress.feedback && (
-                          <div className="mb-6">
-                            <h3 className="text-lg font-semibold mb-3">Instructor Feedback</h3>
-                            <div className="bg-gray-700/30 p-4 rounded-lg border-l-4 border-blue-500">
-                              <p className="text-gray-300 italic">{progress.feedback}</p>
-                            </div>
-                          </div>
-                        )}
-                        
-                        {/* Badges */}
-                        <div>
-                          <h3 className="text-lg font-semibold mb-3">Badges Earned</h3>
-                          {progress.badgesEarned.length > 0 ? (
-                            <div className="flex flex-wrap gap-3">
-                              {progress.badgesEarned.map((badge, idx) => (
-                                <div key={idx} className="bg-gray-800/80 border border-gray-600 px-3 py-2 rounded-lg flex items-center">
-                                  <div className="p-1.5 bg-gradient-to-r from-amber-500 to-amber-600 rounded-full mr-2">
-                                    <Award size={14} className="text-white" />
-                                  </div>
-                                  <span className="text-sm font-medium">{badge}</span>
-                                </div>
-                              ))}
-                            </div>
-                          ) : (
-                            <div className="bg-gray-700/30 p-4 rounded-lg text-gray-400 text-sm">
-                              No badges earned yet. Complete course milestones to earn badges.
-                            </div>
-                          )}
-                        </div>
-                        
-                        {/* Module Progress */}
-                        <div className="mt-6">
-                          <h3 className="text-lg font-semibold mb-3">Module Progress</h3>
-                          <div className="space-y-2">
-                            {/* Generating mock modules for demo */}
-                            {Array.from({ length: progress.totalModules }, (_, idx) => {
-                              const moduleId = `mod${idx + 1}`;
-                              const isCompleted = progress.completedModules.includes(moduleId);
-                              
-                              return (
-                                <div 
-                                  key={moduleId}
-                                  className={`p-3 rounded-lg flex items-center justify-between 
-                                  ${isCompleted ? 'bg-green-900/20 border border-green-700/50' : 'bg-gray-700/30 border border-gray-600/50'}`}
-                                >
-                                  <div className="flex items-center">
-                                    {isCompleted ? (
-                                      <CheckCircle size={18} className="text-green-400 mr-2" />
-                                    ) : (
-                                      <Clock size={18} className="text-gray-400 mr-2" />
-                                    )}
-                                    <span>Module {idx + 1}: {isCompleted ? 'Completed' : 'Pending'}</span>
-                                  </div>
-                                  
-                                  <button 
-                                    onClick={() => handleModuleCompletion(progress.id, moduleId, !isCompleted)}
-                                    className={`text-xs px-3 py-1 rounded-full 
-                                    ${isCompleted ? 
-                                      'bg-gray-700 hover:bg-gray-600 text-gray-300' : 
-                                      'bg-green-700 hover:bg-green-600 text-white'}`}
-                                  >
-                                    {isCompleted ? 'Mark Incomplete' : 'Mark Complete'}
-                                  </button>
-                                </div>
-                              );
-                            })}
-                          </div>
+                          ))}
                         </div>
                       </div>
+                    )}
+                    
+                    {/* Feedback */}
+                    <div className="pt-2">
+                      <p className="text-sm text-gray-400 italic line-clamp-2">
+                        "{progress.feedback}"
+                      </p>
+                    </div>
+                    
+                    {/* View Details Button */}
+                    <div className="pt-3">
+                      <button 
+                        className="w-full py-3 bg-gray-700/80 backdrop-blur-sm border border-gray-600 rounded-lg hover:bg-gray-600/80 transition-colors flex items-center justify-center font-medium group"
+                        onClick={() => handleViewDetails(progress)}
+                      >
+                        View Details
+                        <ChevronRight size={16} className="ml-1 transition-transform group-hover:translate-x-1" />
+                      </button>
                     </div>
                   </div>
-                );
-              })}
+                </div>
+              ))}
             </div>
           ) : (
             <div className="text-center py-20">
               <div className="bg-gray-800/60 backdrop-blur-sm rounded-xl p-8 max-w-lg mx-auto border border-gray-700">
-                <AlertCircle size={48} className="mx-auto mb-4 text-gray-400" />
-                <h3 className="text-xl font-semibold mb-3">No courses found</h3>
-                <p className="text-gray-400 mb-6">
-                  {activeTab === 'completed' 
-                    ? "You haven't completed any courses yet." 
-                    : activeTab === 'inProgress'
-                    ? "You don't have any courses in progress."
-                    : "You aren't enrolled in any courses yet."}
-                </p>
+                <h3 className="text-xl font-semibold mb-3">No progress data found</h3>
+                <p className="text-gray-400 mb-6">Try adjusting your search or filter criteria to find more data.</p>
                 <button 
-                  onClick={() => navigate('/courses')}
+                  onClick={() => {setActiveFilter('all'); setSearchQuery('');}}
                   className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-colors"
                 >
-                  Browse Courses
+                  Reset filters
                 </button>
               </div>
             </div>
           )}
         </div>
       </section>
+
+      {/* Details Modal */}
+      {selectedProgress && (
+        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div 
+            className="bg-gray-800 rounded-xl border border-gray-700 max-w-2xl w-full max-h-[80vh] overflow-y-auto shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className={`h-2 w-full bg-gradient-to-r ${selectedProgress.colorClass}`}></div>
+            
+            <div className="p-6">
+              <div className="flex justify-between items-start mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-white">Course Progress Details</h2>
+                  <p className="text-gray-400">Course ID: {selectedProgress.courseId}</p>
+                </div>
+                <button 
+                  onClick={handleCloseDetails}
+                  className="p-2 rounded-full bg-gray-700 hover:bg-gray-600 transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              {/* Progress Info */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div className="bg-gray-700/30 p-4 rounded-lg">
+                  <h3 className="text-lg font-semibold mb-4">Progress Overview</h3>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-sm text-gray-400 mb-1">Overall Progress</p>
+                      <div className="w-full bg-gray-700/50 rounded-full h-4 overflow-hidden">
+                        <div 
+                          className={`h-4 rounded-full bg-gradient-to-r ${selectedProgress.colorClass}`}
+                          style={{ width: `${selectedProgress.progressPercentage}%` }}
+                        ></div>
+                      </div>
+                      <p className="text-right text-sm mt-1 text-gray-300">
+                        {formatPercentage(selectedProgress.progressPercentage)}
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <p className="text-sm text-gray-400 mb-1">Modules Completed</p>
+                      <p className="text-xl font-bold text-white">
+                        {selectedProgress.completedModules.length} / {selectedProgress.totalModules}
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <p className="text-sm text-gray-400 mb-1">Status</p>
+                      <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                        ${selectedProgress.status === 'completed' ? 'bg-green-500/20 text-green-300 border border-green-500/30' : 
+                          selectedProgress.status === 'advanced' ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' :
+                          selectedProgress.status === 'intermediate' ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30' :
+                          'bg-purple-500/20 text-purple-300 border border-purple-500/30'}
+                      `}>
+                        <Sparkles size={14} className="mr-1.5" />
+                        {selectedProgress.status.charAt(0).toUpperCase() + selectedProgress.status.slice(1)}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <p className="text-sm text-gray-400 mb-1">Certificate Eligibility</p>
+                      <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                        ${selectedProgress.isCertificateEligible ? 
+                          'bg-green-500/20 text-green-300 border border-green-500/30' : 
+                          'bg-red-500/20 text-red-300 border border-red-500/30'}
+                      `}>
+                        {selectedProgress.isCertificateEligible ? (
+                          <>
+                            <ShieldCheck size={14} className="mr-1.5" />
+                            Eligible
+                          </>
+                        ) : (
+                          <>
+                            <AlertTriangle size={14} className="mr-1.5" />
+                            Not Eligible Yet
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Chart */}
+                <div className="bg-gray-700/30 p-4 rounded-lg">
+                  <h3 className="text-lg font-semibold mb-4">Completion Analysis</h3>
+                  
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={getModuleChartData(selectedProgress)}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {getModuleChartData(selectedProgress).map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={index === 0 ? '#4F46E5' : '#1F2937'} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Completed Modules */}
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-4">Completed Modules</h3>
+                {selectedProgress.completedModules && selectedProgress.completedModules.length > 0 ? (
+                  <div className="bg-gray-700/30 rounded-lg overflow-hidden">
+                    <ul className="divide-y divide-gray-700/50">
+                      {selectedProgress.completedModules.map((module, index) => (
+                        <li key={index} className="px-4 py-3 flex items-center">
+                          <div className="p-1.5 bg-green-500/20 rounded-full mr-3">
+                            <Check size={14} className="text-green-400" />
+                          </div>
+                          <span className="text-gray-300">{module}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : (
+                  <div className="bg-gray-700/30 rounded-lg p-4 text-center">
+                    <p className="text-gray-400">No modules have been completed yet.</p>
+                  </div>
+                )}
+              </div>
+              
+              {/* Badges */}
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-4">Badges Earned</h3>
+                {selectedProgress.badgesEarned && selectedProgress.badgesEarned.length > 0 ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {selectedProgress.badgesEarned.map((badge, index) => (
+                      <div 
+                        key={index} 
+                        className="bg-gray-700/30 rounded-lg p-4 text-center hover:bg-gray-700/50 transition-colors"
+                      >
+                        <div className="mb-2 flex justify-center">
+                          <div className="p-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-600">
+                            <Award size={24} className="text-white" />
+                          </div>
+                        </div>
+                        <p className="text-sm font-medium text-gray-300">{badge}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="bg-gray-700/30 rounded-lg p-4 text-center">
+                    <p className="text-gray-400">No badges have been earned yet.</p>
+                  </div>
+                )}
+              </div>
+              
+              {/* Feedback */}
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Feedback</h3>
+                <div className="bg-gray-700/30 rounded-lg p-4">
+                  <p className="text-gray-300 italic">
+                    "{selectedProgress.feedback}"
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Modal Footer */}
+            <div className="bg-gray-800 border-t border-gray-700 p-4 flex justify-end">
+              <button 
+                onClick={handleCloseDetails}
+                className="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Footer */}
+      <footer className="py-8 bg-gray-900/50 border-t border-gray-800">
+        <div className="container mx-auto px-6 text-center">
+          <p className="text-gray-500 text-sm">
+            &copy; {new Date().getFullYear()} Skills Progress Dashboard. All rights reserved.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
