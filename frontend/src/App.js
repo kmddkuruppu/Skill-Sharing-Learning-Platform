@@ -16,7 +16,6 @@ import Enrollment from './User/Enrollment';
 import AddSkill from './User/AddSkill';
 import Skill from './User/Skill';
 import Progress from './User/Progress';
-import AddProgress from './User/AddProgress'
 
 // import Admin pages
 import AddCouse from './Admin/AddCouse';
@@ -49,7 +48,6 @@ function LayoutWrapper() {
         <Route path='/addskill' element={<AddSkill />} />
         <Route path='/skill' element={<Skill />} />
         <Route path='/progress' element={<Progress />} />
-        <Route path='/addprogress' element={<AddProgress />} />
 
         {/* Admin */}
         <Route path='/addcourse' element={<AddCouse />} />
