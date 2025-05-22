@@ -1,640 +1,693 @@
- import { useState, useEffect } from 'react';
-import { PlusCircle, Save, Trash2, RefreshCw, Pencil, X, CheckCircle, BookOpen, BarChart2, ChevronDown, ChevronUp } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell
+} from 'recharts';
+import {
+  Award,
+  BookOpen,
+  ChevronRight,
+  Check,
+  Clock,
+  Filter,
+  GraduationCap,
+  Loader2,
+  Search,
+  Sparkles,
+  TrendingUp,
+  RefreshCw,
+  AlertTriangle,
+  BadgeCheck,
+  ShieldCheck,
+  Star
+} from 'lucide-react';
 
-// Topic Module Component
-const TopicModule = ({ module, onModuleUpdate, onModuleDelete }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [moduleData, setModuleData] = useState(module);
-  const [moduleNameError, setModuleNameError] = useState('');
+export default function SkillProgressDashboard() {
+  const [progressData, setProgressData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [activeFilter, setActiveFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedProgress, setSelectedProgress] = useState(null);
+  const [isVisible, setIsVisible] = useState(false);
   
-  // Update moduleData when the module prop changes
-  useEffect(() => {
-    setModuleData(module);
-  }, [module]);
-  
-  // Auto-capitalize first letter
-  const autoCapitalize = (value) => {
-    if (!value) return '';
-    return value.charAt(0).toUpperCase() + value.slice(1);
-  };
-  
-  const handleUpdate = () => {
-    // Validate module name
-    if (!moduleData.name) {
-      setModuleNameError('Module name is required');
-      return;
-    }
-    
-    if (moduleData.name[0] !== moduleData.name[0].toUpperCase()) {
-      setModuleData({...moduleData, name: autoCapitalize(moduleData.name)});
-    }
-    
-    onModuleUpdate(moduleData);
-    setIsEditing(false);
-    setModuleNameError('');
-  };
-  
-  return (
-    <div className="bg-gray-700 p-3 rounded-md shadow-sm mb-2">
-      {isEditing ? (
-        <div className="flex flex-col gap-2">
-          <input
-            type="text"
-            value={moduleData.name}
-            onChange={(e) => setModuleData({...moduleData, name: autoCapitalize(e.target.value)})}
-            className="border rounded px-3 py-2 bg-gray-600 text-white w-full"
-          />
-          {moduleNameError && <p className="text-red-400 text-xs">{moduleNameError}</p>}
-          <div className="flex gap-2">
-            <input
-              type="number"
-              min="0"
-              max="100"
-              value={moduleData.progress}
-              onChange={(e) => setModuleData({...moduleData, progress: parseInt(e.target.value) || 0})}
-              className="border rounded px-3 py-2 bg-gray-600 text-white w-full"
-            />
-            <div className="flex gap-1">
-              <button
-                onClick={() => {
-                  setIsEditing(false);
-                  setModuleNameError('');
-                }}
-                className="bg-gray-500 hover:bg-gray-400 text-white px-3 py-1 rounded"
-              >
-                <X size={16} />
-              </button>
-              <button
-                onClick={handleUpdate}
-                className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded"
-              >
-                <Save size={16} />
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="flex justify-between items-center">
-          <div className="flex-1">
-            <p className="font-medium">{module.name}</p>
-            <div className="w-full bg-gray-600 rounded h-2 mt-1">
-              <div 
-                className="bg-gradient-to-r from-blue-400 to-blue-600 h-2 rounded"
-                style={{ width: `${module.progress}%` }}
-              ></div>
-            </div>
-            <p className="text-xs text-gray-300 mt-1">{module.progress}% complete</p>
-          </div>
-          <div className="flex gap-1 ml-2">
-            <button
-              onClick={() => setIsEditing(true)}
-              className="bg-yellow-500 hover:bg-yellow-600 text-white px-2 py-1 rounded text-xs"
-              title="Edit Module"
-            >
-              <Pencil size={14} />
-            </button>
-            <button
-              onClick={() => onModuleDelete(module.id)}
-              className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-xs"
-              title="Delete Module"
-            >
-              <Trash2 size={14} />
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
+  // Filter options
+  const filters = [
+    { id: 'all', name: 'All Progress', icon: <Sparkles size={16} className="mr-1.5" /> },
+    { id: 'certificate', name: 'Certificate Eligible', icon: <Award size={16} className="mr-1.5" /> },
+    { id: 'in-progress', name: 'In Progress', icon: <Clock size={16} className="mr-1.5" /> },
+    { id: 'completed', name: 'Completed', icon: <Check size={16} className="mr-1.5" /> }
+  ];
 
-export default function LearningProgressUpdate() {
-  // Initial topic data with modules
-  const [topics, setTopics] = useState([
-    { 
-      id: 1, 
-      name: 'React fundamentals', 
-      progress: 85, 
-      createdAt: new Date(Date.now() - 86400000 * 7),
-      expanded: false,
-      modules: [
-        { id: 101, name: 'JSX Syntax', progress: 100 },
-        { id: 102, name: 'Component Lifecycle', progress: 90 },
-        { id: 103, name: 'Hooks Introduction', progress: 75 },
-        { id: 104, name: 'State Management', progress: 70 }
-      ]
-    },
-    {
-      id: 2, 
-      name: 'CSS Grid layouts', 
-      progress: 65, 
-      createdAt: new Date(Date.now() - 86400000 * 5),
-      expanded: false,
-      modules: [
-        { id: 201, name: 'Grid Basics', progress: 100 },
-        { id: 202, name: 'Responsive Layouts', progress: 80 },
-        { id: 203, name: 'Grid Template Areas', progress: 40 },
-        { id: 204, name: 'Advanced Grid Techniques', progress: 20 }
-      ]
-    },
-    {
-      id: 3, 
-      name: 'TypeScript basics', 
-      progress: 40, 
-      createdAt: new Date(Date.now() - 86400000 * 2),
-      expanded: false,
-      modules: [
-        { id: 301, name: 'Types and Interfaces', progress: 75 },
-        { id: 302, name: 'Type Inference', progress: 50 },
-        { id: 303, name: 'Generics', progress: 25 },
-        { id: 304, name: 'Advanced Types', progress: 10 }
-      ]
-    }
-  ]);
-  
-  const [isAdding, setIsAdding] = useState(false);
-  const [newTopic, setNewTopic] = useState({ name: '', progress: 0, modules: [] });
-  const [editId, setEditId] = useState(null);
-  const [nameError, setNameError] = useState('');
-  const [progressError, setProgressError] = useState('');
-  const [showSaved, setShowSaved] = useState(false);
-  const [notification, setNotification] = useState({message: '', visible: false});
-  const [isAddingModule, setIsAddingModule] = useState(null);
-  const [newModule, setNewModule] = useState({ name: '', progress: 0 });
-  
-  // Calculate overall progress based on modules
+  // Random color generator for charts
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
+  const getRandomColor = () => COLORS[Math.floor(Math.random() * COLORS.length)];
+
+  // Format percentage for display
+  const formatPercentage = (percentage) => {
+    return `${percentage.toFixed(1)}%`;
+  };
+
+  // Fetch progress data from the API
   useEffect(() => {
-    // Use functional update to avoid stale state issues
-    setTopics(currentTopics => 
-      currentTopics.map(topic => {
-        if (topic.modules && topic.modules.length > 0) {
-          const totalProgress = topic.modules.reduce((sum, module) => sum + module.progress, 0);
-          const averageProgress = Math.round(totalProgress / topic.modules.length);
-          
-          // Only update if the progress has actually changed
-          if (averageProgress !== topic.progress) {
-            return { ...topic, progress: averageProgress };
-          }
+    const fetchProgressData = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch('http://localhost:8080/api/progress');
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
         }
-        return topic;
-      })
-    );
-  }, [topics]); // Use a simpler dependency that won't cause infinite loops
-
-  // Auto-capitalize first letter on first touch
-  const autoCapitalize = (value) => {
-    if (!value) return '';
-    return value.charAt(0).toUpperCase() + value.slice(1);
-  };
-  
-  // Validate topic name
-  const validateName = (name) => {
-    if (!name) {
-      setNameError('Topic name is required');
-      return false;
-    }
-    
-    if (name[0] !== name[0].toUpperCase()) {
-      setNameError('Topic name must start with a capital letter');
-      return false;
-    }
-    
-    setNameError('');
-    return true;
-  };
-  
-  // Validate progress
-  const validateProgress = (progress) => {
-    const progressNum = Number(progress);
-    if (isNaN(progressNum)) {
-      setProgressError('Progress must be a number');
-      return false;
-    }
-    
-    if (progressNum < 0 || progressNum > 100) {
-      setProgressError('Progress must be between 0 and 100');
-      return false;
-    }
-    
-    setProgressError('');
-    return true;
-  };
-  
-  // Add new topic
-  const handleAddTopic = () => {
-    const isNameValid = validateName(newTopic.name);
-    
-    if (!isNameValid) return;
-    
-    // Find the highest existing ID and add 1
-    const id = topics.length > 0 
-      ? Math.max(...topics.map(t => t.id)) + 1 
-      : 1;
-    
-    // Create default modules for new topic
-    const defaultModules = [
-      { id: id * 100 + 1, name: 'Introduction', progress: 0 },
-      { id: id * 100 + 2, name: 'Fundamentals', progress: 0 },
-      { id: id * 100 + 3, name: 'Advanced Concepts', progress: 0 }
-    ];
-    
-    // Create a new topic with all required properties
-    const topicToAdd = { 
-      ...newTopic, 
-      id, 
-      progress: 0,
-      modules: defaultModules,
-      expanded: false,
-      createdAt: new Date() 
+        
+        const data = await response.json();
+        
+        // Transform data for our component
+        const transformedData = data.map(progress => ({
+          id: progress.id,
+          userId: progress.userId,
+          courseId: progress.courseId,
+          completedModules: progress.completedModules || [],
+          totalModules: progress.totalModules,
+          progressPercentage: progress.progressPercentage,
+          isCertificateEligible: progress.isCertificateEligible,
+          badgesEarned: progress.badgesEarned || [],
+          feedback: progress.feedback || 'No feedback available yet.',
+          // Add visual properties for the cards
+          colorClass: getRandomColorClass(),
+          status: getProgressStatus(progress.progressPercentage)
+        }));
+        
+        setProgressData(transformedData);
+        setError(null);
+      } catch (err) {
+        setError(`Failed to fetch progress data: ${err.message}`);
+        console.error("Error fetching progress data:", err);
+      } finally {
+        setIsLoading(false);
+      }
     };
     
-    // Use functional update to ensure we're working with the latest state
-    setTopics(currentTopics => [...currentTopics, topicToAdd]);
-    setNewTopic({ name: '', progress: 0, modules: [] });
-    setIsAdding(false);
-    showSavedNotification("Topic added successfully!");
-  };
-  
-  // Toggle topic expanded state
-  const toggleExpand = (id) => {
-    setTopics(topics.map(topic => 
-      topic.id === id ? { ...topic, expanded: !topic.expanded } : topic
-    ));
-  };
-  
-  // Handle updating topic
-  const handleUpdateTopic = (id) => {
-    const topicToUpdate = topics.find(t => t.id === id);
-    
-    const isNameValid = validateName(topicToUpdate.name);
-    
-    if (!isNameValid) return;
-    
-    // Make a copy to ensure proper state update
-    const updatedTopics = topics.map(topic => 
-      topic.id === id ? { ...topic } : topic
-    );
-    
-    setTopics(updatedTopics);
-    setEditId(null);
-    showSavedNotification("Topic updated successfully!");
-  };
-  
-  // Handle deleting topic
-  const handleDeleteTopic = (id) => {
-    // Use functional update to ensure we're working with the latest state
-    setTopics(currentTopics => currentTopics.filter(topic => topic.id !== id));
-    // If we were editing this topic, exit edit mode
-    if (editId === id) {
-      setEditId(null);
-    }
-    // If we were adding a module to this topic, cancel that operation
-    if (isAddingModule === id) {
-      setIsAddingModule(null);
-    }
-    showSavedNotification("Topic deleted successfully!");
-  };
-  
-  // Handle adding module to a topic
-  const handleAddModule = (topicId) => {
-    if (!newModule.name) {
-      setProgressError("Module name is required");
-      return;
-    }
-    
-    // Find the highest module ID across all topics and add 1
-    const allModuleIds = topics.flatMap(t => t.modules?.map(m => m.id) || []);
-    const moduleId = allModuleIds.length > 0 ? Math.max(...allModuleIds) + 1 : 1;
-    
-    // Use functional update to ensure we're working with the latest state
-    setTopics(currentTopics => 
-      currentTopics.map(topic => {
-        if (topic.id === topicId) {
-          const moduleToAdd = {
-            id: moduleId,
-            name: autoCapitalize(newModule.name),
-            progress: parseInt(newModule.progress) || 0
-          };
-          
-          return {
-            ...topic,
-            modules: [...(topic.modules || []), moduleToAdd]
-          };
-        }
-        return topic;
-      })
-    );
-    
-    setNewModule({ name: '', progress: 0 });
-    setIsAddingModule(null);
-    showSavedNotification("Module added successfully!");
-  };
-  
-  // Handle updating a module
-  const handleModuleUpdate = (topicId, updatedModule) => {
-    // Use functional update to ensure we're working with the latest state
-    setTopics(currentTopics => 
-      currentTopics.map(topic => {
-        if (topic.id === topicId) {
-          const updatedModules = topic.modules.map(module => 
-            module.id === updatedModule.id ? updatedModule : module
-          );
-          
-          return { ...topic, modules: updatedModules };
-        }
-        return topic;
-      })
-    );
-    
-    showSavedNotification("Module updated successfully!");
-  };
-  
-  // Handle deleting a module
-  const handleModuleDelete = (topicId, moduleId) => {
-    // Use functional update to ensure we're working with the latest state
-    setTopics(currentTopics => 
-      currentTopics.map(topic => {
-        if (topic.id === topicId) {
-          return {
-            ...topic,
-            modules: topic.modules.filter(module => module.id !== moduleId)
-          };
-        }
-        return topic;
-      })
-    );
-    
-    showSavedNotification("Module deleted successfully!");
-  };
-  
-  // Force refresh to prevent stale state on fast clicks
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
-  
-  const refreshState = () => {
-    setRefreshTrigger(prev => prev + 1);
-  };
-  
-  // Show notification
-  const showSavedNotification = (message = "Changes saved successfully!") => {
-    setNotification({message, visible: true});
-    setTimeout(() => {
-      setNotification({message: '', visible: false});
-      refreshState();
-    }, 2500);
-  };
-  
-  // Format date
-  const formatDate = (date) => {
-    return new Intl.DateTimeFormat('en-US', { 
-      month: 'short', 
-      day: 'numeric',
-      year: 'numeric'
-    }).format(date);
+    fetchProgressData();
+    setIsVisible(true);
+  }, []);
+
+  // Generate random color class for cards (matching the theme)
+  const getRandomColorClass = () => {
+    const colors = [
+      'from-blue-500 to-purple-600',
+      'from-pink-500 to-orange-400',
+      'from-green-400 to-teal-500',
+      'from-indigo-500 to-purple-500',
+      'from-amber-500 to-pink-500',
+      'from-sky-400 to-indigo-500'
+    ];
+    return colors[Math.floor(Math.random() * colors.length)];
   };
 
-  // This key will help React re-render the list items when needed
-  const topicsKey = topics.map(t => `${t.id}-${t.modules?.length || 0}`).join('-');
+  // Determine progress status based on percentage
+  const getProgressStatus = (percentage) => {
+    if (percentage >= 100) return 'completed';
+    if (percentage >= 80) return 'advanced';
+    if (percentage >= 50) return 'intermediate';
+    return 'beginner';
+  };
+
+  // Filter the progress data based on selected filter and search
+  const filteredProgressData = progressData.filter(progress => {
+    // Apply filter
+    if (activeFilter === 'certificate' && !progress.isCertificateEligible) return false;
+    if (activeFilter === 'completed' && progress.progressPercentage < 100) return false;
+    if (activeFilter === 'in-progress' && progress.progressPercentage >= 100) return false;
+    
+    // Apply search
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      return (
+        progress.courseId.toLowerCase().includes(query) ||
+        progress.userId.toLowerCase().includes(query) ||
+        (progress.feedback && progress.feedback.toLowerCase().includes(query))
+      );
+    }
+    
+    return true;
+  });
+
+  // Handle view details
+  const handleViewDetails = (progress) => {
+    setSelectedProgress(progress);
+  };
+
+  // Close details panel
+  const handleCloseDetails = () => {
+    setSelectedProgress(null);
+  };
+
+  // Handle refresh
+  const handleRefresh = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('http://localhost:8080/api/progress');
+      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+      const data = await response.json();
+      
+      const transformedData = data.map(progress => ({
+        id: progress.id,
+        userId: progress.userId,
+        courseId: progress.courseId,
+        completedModules: progress.completedModules || [],
+        totalModules: progress.totalModules,
+        progressPercentage: progress.progressPercentage,
+        isCertificateEligible: progress.isCertificateEligible,
+        badgesEarned: progress.badgesEarned || [],
+        feedback: progress.feedback || 'No feedback available yet.',
+        colorClass: getRandomColorClass(),
+        status: getProgressStatus(progress.progressPercentage)
+      }));
+      
+      setProgressData(transformedData);
+      setError(null);
+    } catch (err) {
+      setError(`Failed to refresh: ${err.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Generate module data for chart
+  const getModuleChartData = (progress) => {
+    if (!progress) return [];
+    
+    return [
+      { name: 'Completed', value: progress.completedModules.length },
+      { name: 'Remaining', value: progress.totalModules - progress.completedModules.length }
+    ];
+  };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white pt-16 pb-16 flex flex-col items-center justify-center bg-[radial-gradient(ellipse_at_top_right,_rgba(29,78,216,0.15),transparent_50%),radial-gradient(ellipse_at_bottom_left,_rgba(17,24,39,0.7),rgba(17,24,39,1)_70%)]" style={{ overflowY: 'auto' }}>
-      <div className="w-full max-w-2xl bg-gray-800 p-6 rounded-lg shadow-xl border border-gray-700 mb-16">
-        <div className="flex items-center gap-3 mb-8 pt-4">
-          <div className="bg-blue-600 p-2 rounded-lg">
-            <BarChart2 size={24} />
-          </div>
-          <h1 className="text-3xl font-bold text-white">Learning Progress Update</h1>
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-gray-950 text-gray-100">
+      {/* Header Section */}
+      <header className="py-12 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-900/20 via-purple-900/20 to-blue-900/20 animate-gradient-x"></div>
+        
+        {/* Animated particles */}
+        <div className="absolute inset-0 overflow-hidden">
+          {[...Array(20)].map((_, i) => (
+            <div 
+              key={i}
+              className="absolute rounded-full bg-blue-500/20 animate-pulse"
+              style={{
+                width: `${Math.random() * 10 + 5}px`,
+                height: `${Math.random() * 10 + 5}px`,
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+                animationDuration: `${Math.random() * 4 + 2}s`,
+                animationDelay: `${Math.random() * 2}s`
+              }}
+            ></div>
+          ))}
         </div>
         
-        {/* Fixed position for error messages */}
-        {(nameError || progressError) && (
-          <div className="bg-red-900/30 border border-red-800 rounded p-3 mb-4">
-            <p className="text-red-400">{nameError || progressError}</p>
-          </div>
-        )}
-        
-        <div className="flex gap-2">
-          {!isAdding && (
-            <button 
-              onClick={() => setIsAdding(true)}
-              className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded hover:from-blue-700 hover:to-blue-800 transition-all mb-6 shadow-md"
-            >
-              <PlusCircle size={18} />
-              <span>Add Topic</span>
-            </button>
-          )}
-        </div>
-        
-        {/* Fixed central notification */}
-        {notification.visible && (
-          <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-blue-700 text-white p-4 rounded-lg shadow-xl flex items-center gap-2 z-50 transition-all">
-            <CheckCircle size={20} />
-            <span className="font-medium">{notification.message}</span>
-          </div>
-        )}
-        
-        {isAdding && (
-          <div className="mb-6 p-5 border border-gray-700 rounded-lg bg-gray-700/50 backdrop-blur-sm shadow-lg">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="font-semibold text-lg text-white">Add New Learning Topic</h2>
-              <button 
-                onClick={() => {
-                  setIsAdding(false);
-                  setNewTopic({ name: '', progress: 0 });
-                  setNameError('');
-                  setProgressError('');
-                }}
-                className="text-gray-300 hover:text-white transition-colors"
-              >
-                <X size={18} />
-              </button>
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="text-center max-w-3xl mx-auto">
+            <div className="mb-6 flex justify-center">
+              <div className="p-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-600">
+                <TrendingUp size={32} className="text-white" />
+              </div>
             </div>
             
-            <div className="flex gap-4 mb-2">
-              <input
-                type="text"
-                placeholder="Topic name"
-                value={newTopic.name}
-                onChange={(e) => setNewTopic({ ...newTopic, name: autoCapitalize(e.target.value) })}
-                className="border border-gray-600 rounded-md px-3 py-2 w-full bg-gray-700 text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all"
-              />
-              
-              <button
-                onClick={handleAddTopic}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md shadow transition-colors"
-              >
-                Add
-              </button>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
+                Skills Progress Dashboard
+              </span>
+            </h1>
+            
+            <p className="text-lg text-gray-300 mb-8 leading-relaxed">
+              Track your learning journey, monitor progress, and earn badges as you master new skills
+            </p>
+            
+            {/* Search Bar */}
+            <div className="relative max-w-xl mx-auto mb-8 group">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full opacity-0 group-focus-within:opacity-100 transition duration-300 blur"></div>
+              <div className="relative">
+                <Search className="absolute left-4 top-3.5 text-gray-400" size={20} />
+                <input 
+                  type="text" 
+                  placeholder="Search by course ID, user ID or feedback..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full py-3.5 pl-12 pr-4 rounded-full bg-gray-800/80 backdrop-blur-sm border border-gray-700 focus:border-blue-400 focus:ring-0 focus:outline-none text-base shadow-lg transition-all duration-300"
+                />
+              </div>
             </div>
-            <p className="text-gray-400 text-sm">Topic will be created with default modules</p>
-          </div>
-        )}
-        
-        <ul key={topicsKey} className="space-y-4">
-          {topics.length === 0 ? (
-            <div className="p-8 text-center text-gray-400 border border-dashed border-gray-700 rounded-lg">
-              <BookOpen size={48} className="mx-auto mb-4 opacity-50" />
-              <p>No learning topics yet. Add your first topic to start tracking!</p>
-            </div>
-          ) : (
-            topics.map((topic) => (
-              <li key={topic.id} className="bg-gradient-to-br from-gray-700 to-gray-800 p-5 rounded-lg shadow-md border border-gray-700">
-                {editId === topic.id ? (
-                  <div className="w-full flex flex-col gap-4">
-                    <input
-                      type="text"
-                      value={topic.name}
-                      onChange={(e) => setTopics(topics.map(t => 
-                        t.id === topic.id ? { ...t, name: autoCapitalize(e.target.value) } : t
-                      ))}
-                      className="border rounded-md px-3 py-2 w-full bg-gray-600 text-white focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none"
-                    />
-                    
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => {
-                          setEditId(null);
-                          setNameError('');
-                          setProgressError('');
-                        }}
-                        className="bg-gray-600 hover:bg-gray-500 text-white px-3 py-1 rounded-md"
-                      >
-                        <X size={16} />
-                      </button>
-                      <button
-                        onClick={() => handleUpdateTopic(topic.id)}
-                        className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-md flex items-center gap-1"
-                      >
-                        <Save size={16} />
-                        <span>Save</span>
-                      </button>
-                    </div>
+            
+            {/* Overall Stats */}
+            {!isLoading && !error && progressData.length > 0 && (
+              <div className="flex flex-wrap justify-center gap-4 mt-6">
+                <div className="flex items-center bg-gray-800/50 backdrop-blur-sm px-4 py-2 rounded-xl border border-gray-700">
+                  <div className="mr-3">
+                    <BookOpen size={24} className="text-blue-400" />
                   </div>
-                ) : (
-                  <>
-                    <div className="flex justify-between items-center">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <h3 className="text-lg font-semibold">{topic.name}</h3>
-                          <button 
-                            onClick={() => toggleExpand(topic.id)}
-                            className="text-gray-400 hover:text-white transition-colors"
-                          >
-                            {topic.expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-                          </button>
-                        </div>
-                        <p className="text-sm text-gray-300">Added on {formatDate(topic.createdAt)}</p>
-                        <div className="w-full bg-gray-600 rounded-full h-3 mt-3">
-                          <div 
-                            className="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full shadow-inner transition-all duration-500"
-                            style={{ width: `${topic.progress}%` }}
-                          ></div>
-                        </div>
-                        <div className="flex justify-between mt-1">
-                          <p className="text-sm text-gray-300">{topic.progress}% complete</p>
-                          <p className="text-sm text-gray-300">{topic.modules?.length || 0} modules</p>
-                        </div>
+                  <div>
+                    <p className="text-xs text-gray-400">Total Courses</p>
+                    <p className="text-lg font-bold">{new Set(progressData.map(p => p.courseId)).size}</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center bg-gray-800/50 backdrop-blur-sm px-4 py-2 rounded-xl border border-gray-700">
+                  <div className="mr-3">
+                    <Star size={24} className="text-yellow-400" fill="#FBBF24" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">Avg. Completion</p>
+                    <p className="text-lg font-bold">
+                      {(progressData.reduce((sum, p) => sum + p.progressPercentage, 0) / progressData.length).toFixed(1)}%
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center bg-gray-800/50 backdrop-blur-sm px-4 py-2 rounded-xl border border-gray-700">
+                  <div className="mr-3">
+                    <GraduationCap size={24} className="text-green-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">Certificate Eligible</p>
+                    <p className="text-lg font-bold">
+                      {progressData.filter(p => p.isCertificateEligible).length}
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center bg-gray-800/50 backdrop-blur-sm px-4 py-2 rounded-xl border border-gray-700">
+                  <div className="mr-3">
+                    <Award size={24} className="text-purple-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">Total Badges</p>
+                    <p className="text-lg font-bold">
+                      {progressData.reduce((sum, p) => sum + (p.badgesEarned?.length || 0), 0)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* Filters */}
+      <section className="py-4 bg-gray-800/30 backdrop-blur-md sticky top-0 z-10 border-y border-gray-700/50 shadow-lg">
+        <div className="container mx-auto px-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <Filter size={18} className="text-blue-400 mr-3" />
+              <span className="text-gray-300 mr-4 hidden md:block font-medium">Filter by:</span>
+            </div>
+            
+            <div className="flex overflow-x-auto pb-2 space-x-2 scrollbar-hide flex-grow">
+              {filters.map(filter => (
+                <button 
+                  key={filter.id}
+                  className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all flex items-center ${
+                    activeFilter === filter.id 
+                      ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/20' 
+                      : 'bg-gray-800/60 text-gray-300 hover:bg-gray-700/80 border border-gray-700/50'
+                  }`}
+                  onClick={() => setActiveFilter(filter.id)}
+                >
+                  {filter.icon}
+                  {filter.name}
+                </button>
+              ))}
+            </div>
+            
+            <button 
+              onClick={handleRefresh}
+              className="ml-2 p-2 rounded-full bg-gray-800/60 text-gray-300 hover:bg-gray-700/80 border border-gray-700/50 transition-all"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <Loader2 size={18} className="animate-spin" />
+              ) : (
+                <RefreshCw size={18} />
+              )}
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Main Content */}
+      <section className="py-8 bg-gradient-to-b from-gray-900 to-gray-900/50">
+        <div className="container mx-auto px-6">
+          {isLoading ? (
+            <div className="flex justify-center items-center py-20">
+              <div className="relative">
+                <div className="absolute -inset-4 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 opacity-50 blur-lg animate-pulse"></div>
+                <Loader2 size={40} className="animate-spin text-white relative" />
+              </div>
+              <span className="ml-4 text-xl">Loading progress data...</span>
+            </div>
+          ) : error ? (
+            <div className="text-center py-20">
+              <div className="bg-red-900/30 backdrop-blur-sm rounded-xl p-8 max-w-lg mx-auto border border-red-700">
+                <AlertTriangle size={32} className="mx-auto mb-4 text-red-400" />
+                <h3 className="text-xl font-semibold mb-3">Error Loading Data</h3>
+                <p className="text-gray-300 mb-6">{error}</p>
+                <button 
+                  onClick={handleRefresh}
+                  className="px-6 py-2 bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors"
+                >
+                  Retry
+                </button>
+              </div>
+            </div>
+          ) : filteredProgressData.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredProgressData.map((progress, index) => (
+                <div 
+                  key={progress.id}
+                  className={`relative rounded-xl overflow-hidden border border-gray-700/50 hover:border-blue-500/80 transition-all duration-500 transform ${
+                    isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                  } hover:-translate-y-2 group`}
+                  style={{ transitionDelay: `${index * 80}ms` }}
+                >
+                  {/* Progress Card Top Gradient Bar */}
+                  <div className={`h-2 w-full bg-gradient-to-r ${progress.colorClass}`}></div>
+                  
+                  {/* Animated Background */}
+                  <div className="absolute inset-0 bg-gray-800/90 backdrop-blur-sm z-0">
+                    <div className={`absolute inset-0 bg-gradient-to-br ${progress.colorClass} opacity-5 group-hover:opacity-10 transition-opacity duration-500`}></div>
+                  </div>
+                  
+                  {/* Progress Content */}
+                  <div className="p-6 space-y-4 relative z-10">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors">
+                          Course ID: {progress.courseId}
+                        </h3>
+                        <p className="text-gray-400 text-sm">User: {progress.userId}</p>
                       </div>
                       
-                      <div className="flex gap-2 ml-4">
-                        <button
-                          onClick={() => setEditId(topic.id)}
-                          className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-md shadow transition-colors"
-                          title="Edit"
-                        >
-                          <Pencil size={16} />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteTopic(topic.id)}
-                          className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md shadow transition-colors"
-                          title="Delete"
-                        >
-                          <Trash2 size={16} />
-                        </button>
+                      <div className={`text-white font-bold py-1 px-3 rounded-full text-sm bg-gradient-to-r ${progress.colorClass}`}>
+                        {formatPercentage(progress.progressPercentage)}
                       </div>
                     </div>
                     
-                    {/* Modules Section */}
-                    {topic.expanded && (
-                      <div className="mt-4 border-t border-gray-600 pt-3">
-                        <div className="flex justify-between items-center mb-2">
-                          <h4 className="font-medium text-gray-300">Modules</h4>
-                          
-                          {isAddingModule !== topic.id && (
-                            <button
-                              onClick={() => setIsAddingModule(topic.id)}
-                              className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-2 py-1 rounded-md flex items-center gap-1"
-                            >
-                              <PlusCircle size={14} />
-                              <span>Add Module</span>
-                            </button>
-                          )}
+                    {/* Progress Bar */}
+                    <div className="w-full bg-gray-700/50 rounded-full h-3 overflow-hidden">
+                      <div 
+                        className={`h-3 rounded-full bg-gradient-to-r ${progress.colorClass}`}
+                        style={{ width: `${progress.progressPercentage}%` }}
+                      ></div>
+                    </div>
+                    
+                    <div className="flex items-center flex-wrap gap-2">
+                      <div className="bg-gray-900/80 backdrop-blur-sm px-2.5 py-1.5 rounded-full text-xs font-medium flex items-center">
+                        <BookOpen size={14} className="text-blue-400 mr-1.5" />
+                        {progress.completedModules.length}/{progress.totalModules} modules
+                      </div>
+                      
+                      {progress.isCertificateEligible && (
+                        <div className="bg-green-500/20 text-green-300 px-2.5 py-1.5 rounded-full text-xs font-medium flex items-center border border-green-500/30">
+                          <ShieldCheck size={14} className="mr-1.5" />
+                          Certificate Eligible
                         </div>
-                        
-                        {isAddingModule === topic.id && (
-                          <div className="bg-gray-700/70 p-3 rounded-md mb-3 flex gap-2">
-                            <input
-                              type="text"
-                              placeholder="Module name"
-                              value={newModule.name}
-                              onChange={(e) => setNewModule({...newModule, name: autoCapitalize(e.target.value)})}
-                              className="border rounded-md px-3 py-1 bg-gray-600 text-white text-sm flex-1"
-                            />
-                            <input
-                              type="number"
-                              min="0"
-                              max="100"
-                              placeholder="Progress"
-                              value={newModule.progress}
-                              onChange={(e) => setNewModule({...newModule, progress: e.target.value})}
-                              className="border rounded-md px-3 py-1 bg-gray-600 text-white text-sm w-20"
-                            />
-                            <div className="flex gap-1">
-                              <button
-                                onClick={() => setIsAddingModule(null)}
-                                className="bg-gray-500 hover:bg-gray-400 text-white px-2 py-1 rounded-md"
-                              >
-                                <X size={14} />
-                              </button>
-                              <button
-                                onClick={() => handleAddModule(topic.id)}
-                                className="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded-md"
-                              >
-                                <Save size={14} />
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                        
-                        <div className="space-y-1 mt-2">
-                          {topic.modules?.length > 0 ? (
-                            topic.modules.map(module => (
-                              <TopicModule
-                                key={module.id}
-                                module={module}
-                                onModuleUpdate={(updatedModule) => handleModuleUpdate(topic.id, updatedModule)}
-                                onModuleDelete={(moduleId) => handleModuleDelete(topic.id, moduleId)}
-                              />
-                            ))
-                          ) : (
-                            <p className="text-gray-400 text-sm py-2">No modules yet.</p>
-                          )}
+                      )}
+                      
+                      <div className={`px-2.5 py-1.5 rounded-full text-xs font-medium flex items-center
+                        ${progress.status === 'completed' ? 'bg-green-500/20 text-green-300 border border-green-500/30' : 
+                          progress.status === 'advanced' ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' :
+                          progress.status === 'intermediate' ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30' :
+                          'bg-purple-500/20 text-purple-300 border border-purple-500/30'}
+                      `}>
+                        <Sparkles size={14} className="mr-1.5" />
+                        {progress.status.charAt(0).toUpperCase() + progress.status.slice(1)}
+                      </div>
+                    </div>
+                    
+                    {/* Badges */}
+                    {progress.badgesEarned && progress.badgesEarned.length > 0 && (
+                      <div className="pt-2">
+                        <div className="flex items-center mb-2">
+                          <BadgeCheck size={16} className="text-blue-400 mr-2" />
+                          <h4 className="text-sm font-medium text-gray-300">Badges Earned</h4>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {progress.badgesEarned.map((badge, i) => (
+                            <span 
+                              key={i} 
+                              className="bg-gray-700/60 backdrop-blur-sm border border-gray-600/30 px-3 py-1 rounded-full text-xs text-gray-300"
+                            >
+                              {badge}
+                            </span>
+                          ))}
                         </div>
                       </div>
                     )}
-                  </>
-                )}
-              </li>
-            ))
+                    
+                    {/* Feedback */}
+                    <div className="pt-2">
+                      <p className="text-sm text-gray-400 italic line-clamp-2">
+                        "{progress.feedback}"
+                      </p>
+                    </div>
+                    
+                    {/* View Details Button */}
+                    <div className="pt-3">
+                      <button 
+                        className="w-full py-3 bg-gray-700/80 backdrop-blur-sm border border-gray-600 rounded-lg hover:bg-gray-600/80 transition-colors flex items-center justify-center font-medium group"
+                        onClick={() => handleViewDetails(progress)}
+                      >
+                        View Details
+                        <ChevronRight size={16} className="ml-1 transition-transform group-hover:translate-x-1" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-20">
+              <div className="bg-gray-800/60 backdrop-blur-sm rounded-xl p-8 max-w-lg mx-auto border border-gray-700">
+                <h3 className="text-xl font-semibold mb-3">No progress data found</h3>
+                <p className="text-gray-400 mb-6">Try adjusting your search or filter criteria to find more data.</p>
+                <button 
+                  onClick={() => {setActiveFilter('all'); setSearchQuery('');}}
+                  className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-colors"
+                >
+                  Reset filters
+                </button>
+              </div>
+            </div>
           )}
-        </ul>
-        
-        <div className="mt-6 flex justify-between text-sm text-gray-400 p-2 border-t border-gray-700 pt-4">
-          <div className="flex items-center gap-1">
-            <RefreshCw size={14} className="animate-spin-slow" />
-            <span>Progress auto-calculated from modules</span>
-          </div>
-          <div>Total topics: {topics.length}</div>
         </div>
-      </div>
+      </section>
+
+      {/* Details Modal */}
+      {selectedProgress && (
+        <div className="fixed inset-0 bg-gray-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div 
+            className="bg-gray-800 rounded-xl border border-gray-700 max-w-2xl w-full max-h-[80vh] overflow-y-auto shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className={`h-2 w-full bg-gradient-to-r ${selectedProgress.colorClass}`}></div>
+            
+            <div className="p-6">
+              <div className="flex justify-between items-start mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-white">Course Progress Details</h2>
+                  <p className="text-gray-400">Course ID: {selectedProgress.courseId}</p>
+                </div>
+                <button 
+                  onClick={handleCloseDetails}
+                  className="p-2 rounded-full bg-gray-700 hover:bg-gray-600 transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              {/* Progress Info */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div className="bg-gray-700/30 p-4 rounded-lg">
+                  <h3 className="text-lg font-semibold mb-4">Progress Overview</h3>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-sm text-gray-400 mb-1">Overall Progress</p>
+                      <div className="w-full bg-gray-700/50 rounded-full h-4 overflow-hidden">
+                        <div 
+                          className={`h-4 rounded-full bg-gradient-to-r ${selectedProgress.colorClass}`}
+                          style={{ width: `${selectedProgress.progressPercentage}%` }}
+                        ></div>
+                      </div>
+                      <p className="text-right text-sm mt-1 text-gray-300">
+                        {formatPercentage(selectedProgress.progressPercentage)}
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <p className="text-sm text-gray-400 mb-1">Modules Completed</p>
+                      <p className="text-xl font-bold text-white">
+                        {selectedProgress.completedModules.length} / {selectedProgress.totalModules}
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <p className="text-sm text-gray-400 mb-1">Status</p>
+                      <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                        ${selectedProgress.status === 'completed' ? 'bg-green-500/20 text-green-300 border border-green-500/30' : 
+                          selectedProgress.status === 'advanced' ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' :
+                          selectedProgress.status === 'intermediate' ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30' :
+                          'bg-purple-500/20 text-purple-300 border border-purple-500/30'}
+                      `}>
+                        <Sparkles size={14} className="mr-1.5" />
+                        {selectedProgress.status.charAt(0).toUpperCase() + selectedProgress.status.slice(1)}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <p className="text-sm text-gray-400 mb-1">Certificate Eligibility</p>
+                      <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                        ${selectedProgress.isCertificateEligible ? 
+                          'bg-green-500/20 text-green-300 border border-green-500/30' : 
+                          'bg-red-500/20 text-red-300 border border-red-500/30'}
+                      `}>
+                        {selectedProgress.isCertificateEligible ? (
+                          <>
+                            <ShieldCheck size={14} className="mr-1.5" />
+                            Eligible
+                          </>
+                        ) : (
+                          <>
+                            <AlertTriangle size={14} className="mr-1.5" />
+                            Not Eligible Yet
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Chart */}
+                <div className="bg-gray-700/30 p-4 rounded-lg">
+                  <h3 className="text-lg font-semibold mb-4">Completion Analysis</h3>
+                  
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={getModuleChartData(selectedProgress)}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {getModuleChartData(selectedProgress).map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={index === 0 ? '#4F46E5' : '#1F2937'} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Completed Modules */}
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-4">Completed Modules</h3>
+                {selectedProgress.completedModules && selectedProgress.completedModules.length > 0 ? (
+                  <div className="bg-gray-700/30 rounded-lg overflow-hidden">
+                    <ul className="divide-y divide-gray-700/50">
+                      {selectedProgress.completedModules.map((module, index) => (
+                        <li key={index} className="px-4 py-3 flex items-center">
+                          <div className="p-1.5 bg-green-500/20 rounded-full mr-3">
+                            <Check size={14} className="text-green-400" />
+                          </div>
+                          <span className="text-gray-300">{module}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : (
+                  <div className="bg-gray-700/30 rounded-lg p-4 text-center">
+                    <p className="text-gray-400">No modules have been completed yet.</p>
+                  </div>
+                )}
+              </div>
+              
+              {/* Badges */}
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-4">Badges Earned</h3>
+                {selectedProgress.badgesEarned && selectedProgress.badgesEarned.length > 0 ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {selectedProgress.badgesEarned.map((badge, index) => (
+                      <div 
+                        key={index} 
+                        className="bg-gray-700/30 rounded-lg p-4 text-center hover:bg-gray-700/50 transition-colors"
+                      >
+                        <div className="mb-2 flex justify-center">
+                          <div className="p-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-600">
+                            <Award size={24} className="text-white" />
+                          </div>
+                        </div>
+                        <p className="text-sm font-medium text-gray-300">{badge}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="bg-gray-700/30 rounded-lg p-4 text-center">
+                    <p className="text-gray-400">No badges have been earned yet.</p>
+                  </div>
+                )}
+              </div>
+              
+              {/* Feedback */}
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Feedback</h3>
+                <div className="bg-gray-700/30 rounded-lg p-4">
+                  <p className="text-gray-300 italic">
+                    "{selectedProgress.feedback}"
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Modal Footer */}
+            <div className="bg-gray-800 border-t border-gray-700 p-4 flex justify-end">
+              <button 
+                onClick={handleCloseDetails}
+                className="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Footer */}
+      <footer className="py-8 bg-gray-900/50 border-t border-gray-800">
+        <div className="container mx-auto px-6 text-center">
+          <p className="text-gray-500 text-sm">
+            &copy; {new Date().getFullYear()} Skills Progress Dashboard. All rights reserved.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }

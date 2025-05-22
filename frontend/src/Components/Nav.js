@@ -27,7 +27,8 @@ export default function Navigation() {
     { name: 'Explore', href: '/course' },
     { name: 'Categories', href: '#' },
     { name: 'Success Journeys', href: '/success' },
-    { name: 'Progress', href: '/progress' }
+    { name: 'Progress', href: '/progress' },
+    { name: 'Offer Your Skill', href: '/skill' }
   ];
   
   const categories = [
