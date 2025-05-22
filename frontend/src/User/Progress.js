@@ -1,469 +1,640 @@
-import { useState, useEffect } from 'react';
-import { 
-  TrendingUp, Clock, Briefcase, User, Star, 
-  Award, BookOpen, CheckCircle, ChevronRight,
-  BarChart2, Loader2, Shield, AlertCircle
-} from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+ import { useState, useEffect } from 'react';
+import { PlusCircle, Save, Trash2, RefreshCw, Pencil, X, CheckCircle, BookOpen, BarChart2, ChevronDown, ChevronUp } from 'lucide-react';
 
-export default function SkillProgressDashboard() {
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [progressData, setProgressData] = useState([]);
-  const [courses, setCourses] = useState([]);
-  const [activeTab, setActiveTab] = useState('inProgress');
-
-  // For demo purpose - In a real app this would come from auth context/state
-  const mockUserId = "user123";
+// Topic Module Component
+const TopicModule = ({ module, onModuleUpdate, onModuleDelete }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [moduleData, setModuleData] = useState(module);
+  const [moduleNameError, setModuleNameError] = useState('');
   
-  // Fetch user's progress data from the backend
+  // Update moduleData when the module prop changes
   useEffect(() => {
-    const fetchProgressData = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(`http://localhost:8080/api/progress/user/${mockUserId}`);
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        setProgressData(data);
-      } catch (err) {
-        setError(`Failed to fetch progress data: ${err.message}`);
-        console.error("Error fetching progress data:", err);
-        
-        // For demo purposes, load mock data if the API call fails
-        const mockProgress = [
-          {
-            id: "prog1",
-            userId: "user123",
-            courseId: "CS101",
-            completedModules: ["mod1", "mod2", "mod3"],
-            totalModules: 8,
-            progressPercentage: 37.5,
-            isCertificateEligible: false,
-            badgesEarned: ["Quick Learner", "Perfect Quiz"],
-            feedback: "Great progress so far! Focus on completing module 4 this week."
-          },
-          {
-            id: "prog2",
-            userId: "user123",
-            courseId: "CS102",
-            completedModules: ["mod1", "mod2", "mod3", "mod4", "mod5", "mod6", "mod7", "mod8", "mod9", "mod10"],
-            totalModules: 10,
-            progressPercentage: 100.0,
-            isCertificateEligible: true,
-            badgesEarned: ["Course Completed", "All Star", "Perfect Attendance"],
-            feedback: "Congratulations on completing the course with excellent results!"
-          }
-        ];
-        
-        setProgressData(mockProgress);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    // Fetch courses data (similar to what we had in CoursesDisplayWall)
-    const fetchCourses = async () => {
-      try {
-        const response = await fetch('http://localhost:8080/api/learnings');
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        
-        // Transform the data
-        const transformedData = data.map(course => ({
-          id: course.id,
-          courseId: course.courseId,
-          courseName: course.courseName,
-          description: course.description,
-          duration: course.duration,
-          colorClass: getRandomColorClass()
-        }));
-        
-        setCourses(transformedData);
-      } catch (err) {
-        console.error("Error fetching courses:", err);
-        
-        // Mock data if API fails
-        setCourses([
-          {
-            id: "1",
-            courseId: "CS101",
-            courseName: "Introduction to Web Development",
-            description: "Learn the fundamentals of web development including HTML, CSS and JavaScript.",
-            duration: "8 weeks",
-            colorClass: getRandomColorClass()
-          },
-          {
-            id: "2",
-            courseId: "CS102",
-            courseName: "React.js Fundamentals",
-            description: "Build modern user interfaces with React, the popular JavaScript library.",
-            duration: "10 weeks",
-            colorClass: getRandomColorClass()
-          }
-        ]);
-      }
-    };
-    
-    fetchProgressData();
-    fetchCourses();
-  }, []);
+    setModuleData(module);
+  }, [module]);
   
-  // Generate a random tailwind color class for cards
-  const getRandomColorClass = () => {
-    const colors = [
-      'from-blue-500 to-purple-600',
-      'from-pink-500 to-orange-400',
-      'from-green-400 to-teal-500',
-      'from-indigo-500 to-purple-500',
-      'from-amber-500 to-pink-500',
-      'from-sky-400 to-indigo-500'
-    ];
-    return colors[Math.floor(Math.random() * colors.length)];
-  }
-  
-  // Find course details by courseId
-  const getCourseDetails = (courseId) => {
-    return courses.find(course => course.courseId === courseId) || {
-      courseName: 'Unknown Course',
-      description: 'Course details not available',
-      colorClass: 'from-gray-500 to-gray-600'
-    };
+  // Auto-capitalize first letter
+  const autoCapitalize = (value) => {
+    if (!value) return '';
+    return value.charAt(0).toUpperCase() + value.slice(1);
   };
   
-  // Filter progress data based on active tab
-  const filteredProgressData = progressData.filter(progress => {
-    if (activeTab === 'inProgress') {
-      return progress.progressPercentage < 100;
-    } else if (activeTab === 'completed') {
-      return progress.progressPercentage === 100;
-    }
-    return true; // 'all' tab
-  });
-  
-  // Handle updating module completion status
-  const handleModuleCompletion = async (progressId, moduleId, isCompleted) => {
-    // Find the current progress item
-    const currentProgress = progressData.find(item => item.id === progressId);
-    if (!currentProgress) return;
-    
-    // Create updated list of completed modules
-    let updatedModules = [...currentProgress.completedModules];
-    
-    if (isCompleted && !updatedModules.includes(moduleId)) {
-      // Add the module to completed list
-      updatedModules.push(moduleId);
-    } else if (!isCompleted && updatedModules.includes(moduleId)) {
-      // Remove the module from completed list
-      updatedModules = updatedModules.filter(mod => mod !== moduleId);
-    } else {
-      // No change needed
+  const handleUpdate = () => {
+    // Validate module name
+    if (!moduleData.name) {
+      setModuleNameError('Module name is required');
       return;
     }
     
-    // Calculate new progress percentage
-    const newPercentage = (updatedModules.length / currentProgress.totalModules) * 100;
-    
-    // Prepare updated progress object
-    const updatedProgress = {
-      ...currentProgress,
-      completedModules: updatedModules,
-      progressPercentage: newPercentage,
-      isCertificateEligible: newPercentage === 100
-    };
-    
-    try {
-      // Send update to the backend
-      const response = await fetch(`http://localhost:8080/api/progress/${progressId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedProgress),
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      
-      // Update local state with the new progress data
-      setProgressData(progressData.map(item => 
-        item.id === progressId ? updatedProgress : item
-      ));
-      
-    } catch (error) {
-      console.error('Error updating progress:', error);
-      alert('Failed to update your progress. Please try again.');
+    if (moduleData.name[0] !== moduleData.name[0].toUpperCase()) {
+      setModuleData({...moduleData, name: autoCapitalize(moduleData.name)});
     }
-  };
-  
-  // Handle certificate download/view
-  const handleViewCertificate = (courseId) => {
-    alert(`Certificate for course ${courseId} will be displayed in a modal or downloaded`);
-    // In a real app, this would open a modal with certificate preview or download
+    
+    onModuleUpdate(moduleData);
+    setIsEditing(false);
+    setModuleNameError('');
   };
   
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-gray-950 text-gray-100">
-      {/* Header Section */}
-      <header className="py-16 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-900/20 via-purple-900/20 to-blue-900/20"></div>
+    <div className="bg-gray-700 p-3 rounded-md shadow-sm mb-2">
+      {isEditing ? (
+        <div className="flex flex-col gap-2">
+          <input
+            type="text"
+            value={moduleData.name}
+            onChange={(e) => setModuleData({...moduleData, name: autoCapitalize(e.target.value)})}
+            className="border rounded px-3 py-2 bg-gray-600 text-white w-full"
+          />
+          {moduleNameError && <p className="text-red-400 text-xs">{moduleNameError}</p>}
+          <div className="flex gap-2">
+            <input
+              type="number"
+              min="0"
+              max="100"
+              value={moduleData.progress}
+              onChange={(e) => setModuleData({...moduleData, progress: parseInt(e.target.value) || 0})}
+              className="border rounded px-3 py-2 bg-gray-600 text-white w-full"
+            />
+            <div className="flex gap-1">
+              <button
+                onClick={() => {
+                  setIsEditing(false);
+                  setModuleNameError('');
+                }}
+                className="bg-gray-500 hover:bg-gray-400 text-white px-3 py-1 rounded"
+              >
+                <X size={16} />
+              </button>
+              <button
+                onClick={handleUpdate}
+                className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded"
+              >
+                <Save size={16} />
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="flex justify-between items-center">
+          <div className="flex-1">
+            <p className="font-medium">{module.name}</p>
+            <div className="w-full bg-gray-600 rounded h-2 mt-1">
+              <div 
+                className="bg-gradient-to-r from-blue-400 to-blue-600 h-2 rounded"
+                style={{ width: `${module.progress}%` }}
+              ></div>
+            </div>
+            <p className="text-xs text-gray-300 mt-1">{module.progress}% complete</p>
+          </div>
+          <div className="flex gap-1 ml-2">
+            <button
+              onClick={() => setIsEditing(true)}
+              className="bg-yellow-500 hover:bg-yellow-600 text-white px-2 py-1 rounded text-xs"
+              title="Edit Module"
+            >
+              <Pencil size={14} />
+            </button>
+            <button
+              onClick={() => onModuleDelete(module.id)}
+              className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-xs"
+              title="Delete Module"
+            >
+              <Trash2 size={14} />
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default function LearningProgressUpdate() {
+  // Initial topic data with modules
+  const [topics, setTopics] = useState([
+    { 
+      id: 1, 
+      name: 'React fundamentals', 
+      progress: 85, 
+      createdAt: new Date(Date.now() - 86400000 * 7),
+      expanded: false,
+      modules: [
+        { id: 101, name: 'JSX Syntax', progress: 100 },
+        { id: 102, name: 'Component Lifecycle', progress: 90 },
+        { id: 103, name: 'Hooks Introduction', progress: 75 },
+        { id: 104, name: 'State Management', progress: 70 }
+      ]
+    },
+    {
+      id: 2, 
+      name: 'CSS Grid layouts', 
+      progress: 65, 
+      createdAt: new Date(Date.now() - 86400000 * 5),
+      expanded: false,
+      modules: [
+        { id: 201, name: 'Grid Basics', progress: 100 },
+        { id: 202, name: 'Responsive Layouts', progress: 80 },
+        { id: 203, name: 'Grid Template Areas', progress: 40 },
+        { id: 204, name: 'Advanced Grid Techniques', progress: 20 }
+      ]
+    },
+    {
+      id: 3, 
+      name: 'TypeScript basics', 
+      progress: 40, 
+      createdAt: new Date(Date.now() - 86400000 * 2),
+      expanded: false,
+      modules: [
+        { id: 301, name: 'Types and Interfaces', progress: 75 },
+        { id: 302, name: 'Type Inference', progress: 50 },
+        { id: 303, name: 'Generics', progress: 25 },
+        { id: 304, name: 'Advanced Types', progress: 10 }
+      ]
+    }
+  ]);
+  
+  const [isAdding, setIsAdding] = useState(false);
+  const [newTopic, setNewTopic] = useState({ name: '', progress: 0, modules: [] });
+  const [editId, setEditId] = useState(null);
+  const [nameError, setNameError] = useState('');
+  const [progressError, setProgressError] = useState('');
+  const [showSaved, setShowSaved] = useState(false);
+  const [notification, setNotification] = useState({message: '', visible: false});
+  const [isAddingModule, setIsAddingModule] = useState(null);
+  const [newModule, setNewModule] = useState({ name: '', progress: 0 });
+  
+  // Calculate overall progress based on modules
+  useEffect(() => {
+    // Use functional update to avoid stale state issues
+    setTopics(currentTopics => 
+      currentTopics.map(topic => {
+        if (topic.modules && topic.modules.length > 0) {
+          const totalProgress = topic.modules.reduce((sum, module) => sum + module.progress, 0);
+          const averageProgress = Math.round(totalProgress / topic.modules.length);
+          
+          // Only update if the progress has actually changed
+          if (averageProgress !== topic.progress) {
+            return { ...topic, progress: averageProgress };
+          }
+        }
+        return topic;
+      })
+    );
+  }, [topics]); // Use a simpler dependency that won't cause infinite loops
+
+  // Auto-capitalize first letter on first touch
+  const autoCapitalize = (value) => {
+    if (!value) return '';
+    return value.charAt(0).toUpperCase() + value.slice(1);
+  };
+  
+  // Validate topic name
+  const validateName = (name) => {
+    if (!name) {
+      setNameError('Topic name is required');
+      return false;
+    }
+    
+    if (name[0] !== name[0].toUpperCase()) {
+      setNameError('Topic name must start with a capital letter');
+      return false;
+    }
+    
+    setNameError('');
+    return true;
+  };
+  
+  // Validate progress
+  const validateProgress = (progress) => {
+    const progressNum = Number(progress);
+    if (isNaN(progressNum)) {
+      setProgressError('Progress must be a number');
+      return false;
+    }
+    
+    if (progressNum < 0 || progressNum > 100) {
+      setProgressError('Progress must be between 0 and 100');
+      return false;
+    }
+    
+    setProgressError('');
+    return true;
+  };
+  
+  // Add new topic
+  const handleAddTopic = () => {
+    const isNameValid = validateName(newTopic.name);
+    
+    if (!isNameValid) return;
+    
+    // Find the highest existing ID and add 1
+    const id = topics.length > 0 
+      ? Math.max(...topics.map(t => t.id)) + 1 
+      : 1;
+    
+    // Create default modules for new topic
+    const defaultModules = [
+      { id: id * 100 + 1, name: 'Introduction', progress: 0 },
+      { id: id * 100 + 2, name: 'Fundamentals', progress: 0 },
+      { id: id * 100 + 3, name: 'Advanced Concepts', progress: 0 }
+    ];
+    
+    // Create a new topic with all required properties
+    const topicToAdd = { 
+      ...newTopic, 
+      id, 
+      progress: 0,
+      modules: defaultModules,
+      expanded: false,
+      createdAt: new Date() 
+    };
+    
+    // Use functional update to ensure we're working with the latest state
+    setTopics(currentTopics => [...currentTopics, topicToAdd]);
+    setNewTopic({ name: '', progress: 0, modules: [] });
+    setIsAdding(false);
+    showSavedNotification("Topic added successfully!");
+  };
+  
+  // Toggle topic expanded state
+  const toggleExpand = (id) => {
+    setTopics(topics.map(topic => 
+      topic.id === id ? { ...topic, expanded: !topic.expanded } : topic
+    ));
+  };
+  
+  // Handle updating topic
+  const handleUpdateTopic = (id) => {
+    const topicToUpdate = topics.find(t => t.id === id);
+    
+    const isNameValid = validateName(topicToUpdate.name);
+    
+    if (!isNameValid) return;
+    
+    // Make a copy to ensure proper state update
+    const updatedTopics = topics.map(topic => 
+      topic.id === id ? { ...topic } : topic
+    );
+    
+    setTopics(updatedTopics);
+    setEditId(null);
+    showSavedNotification("Topic updated successfully!");
+  };
+  
+  // Handle deleting topic
+  const handleDeleteTopic = (id) => {
+    // Use functional update to ensure we're working with the latest state
+    setTopics(currentTopics => currentTopics.filter(topic => topic.id !== id));
+    // If we were editing this topic, exit edit mode
+    if (editId === id) {
+      setEditId(null);
+    }
+    // If we were adding a module to this topic, cancel that operation
+    if (isAddingModule === id) {
+      setIsAddingModule(null);
+    }
+    showSavedNotification("Topic deleted successfully!");
+  };
+  
+  // Handle adding module to a topic
+  const handleAddModule = (topicId) => {
+    if (!newModule.name) {
+      setProgressError("Module name is required");
+      return;
+    }
+    
+    // Find the highest module ID across all topics and add 1
+    const allModuleIds = topics.flatMap(t => t.modules?.map(m => m.id) || []);
+    const moduleId = allModuleIds.length > 0 ? Math.max(...allModuleIds) + 1 : 1;
+    
+    // Use functional update to ensure we're working with the latest state
+    setTopics(currentTopics => 
+      currentTopics.map(topic => {
+        if (topic.id === topicId) {
+          const moduleToAdd = {
+            id: moduleId,
+            name: autoCapitalize(newModule.name),
+            progress: parseInt(newModule.progress) || 0
+          };
+          
+          return {
+            ...topic,
+            modules: [...(topic.modules || []), moduleToAdd]
+          };
+        }
+        return topic;
+      })
+    );
+    
+    setNewModule({ name: '', progress: 0 });
+    setIsAddingModule(null);
+    showSavedNotification("Module added successfully!");
+  };
+  
+  // Handle updating a module
+  const handleModuleUpdate = (topicId, updatedModule) => {
+    // Use functional update to ensure we're working with the latest state
+    setTopics(currentTopics => 
+      currentTopics.map(topic => {
+        if (topic.id === topicId) {
+          const updatedModules = topic.modules.map(module => 
+            module.id === updatedModule.id ? updatedModule : module
+          );
+          
+          return { ...topic, modules: updatedModules };
+        }
+        return topic;
+      })
+    );
+    
+    showSavedNotification("Module updated successfully!");
+  };
+  
+  // Handle deleting a module
+  const handleModuleDelete = (topicId, moduleId) => {
+    // Use functional update to ensure we're working with the latest state
+    setTopics(currentTopics => 
+      currentTopics.map(topic => {
+        if (topic.id === topicId) {
+          return {
+            ...topic,
+            modules: topic.modules.filter(module => module.id !== moduleId)
+          };
+        }
+        return topic;
+      })
+    );
+    
+    showSavedNotification("Module deleted successfully!");
+  };
+  
+  // Force refresh to prevent stale state on fast clicks
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  
+  const refreshState = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
+  
+  // Show notification
+  const showSavedNotification = (message = "Changes saved successfully!") => {
+    setNotification({message, visible: true});
+    setTimeout(() => {
+      setNotification({message: '', visible: false});
+      refreshState();
+    }, 2500);
+  };
+  
+  // Format date
+  const formatDate = (date) => {
+    return new Intl.DateTimeFormat('en-US', { 
+      month: 'short', 
+      day: 'numeric',
+      year: 'numeric'
+    }).format(date);
+  };
+
+  // This key will help React re-render the list items when needed
+  const topicsKey = topics.map(t => `${t.id}-${t.modules?.length || 0}`).join('-');
+
+  return (
+    <div className="min-h-screen bg-gray-900 text-white pt-16 pb-16 flex flex-col items-center justify-center bg-[radial-gradient(ellipse_at_top_right,_rgba(29,78,216,0.15),transparent_50%),radial-gradient(ellipse_at_bottom_left,_rgba(17,24,39,0.7),rgba(17,24,39,1)_70%)]" style={{ overflowY: 'auto' }}>
+      <div className="w-full max-w-2xl bg-gray-800 p-6 rounded-lg shadow-xl border border-gray-700 mb-16">
+        <div className="flex items-center gap-3 mb-8 pt-4">
+          <div className="bg-blue-600 p-2 rounded-lg">
+            <BarChart2 size={24} />
+          </div>
+          <h1 className="text-3xl font-bold text-white">Learning Progress Update</h1>
+        </div>
         
-        <div className="container mx-auto px-6 relative z-10">
-          <div className="max-w-3xl mx-auto text-center">
-            <div className="mb-8 flex justify-center">
-              <div className="p-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-600">
-                <BarChart2 size={36} className="text-white" />
-              </div>
+        {/* Fixed position for error messages */}
+        {(nameError || progressError) && (
+          <div className="bg-red-900/30 border border-red-800 rounded p-3 mb-4">
+            <p className="text-red-400">{nameError || progressError}</p>
+          </div>
+        )}
+        
+        <div className="flex gap-2">
+          {!isAdding && (
+            <button 
+              onClick={() => setIsAdding(true)}
+              className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded hover:from-blue-700 hover:to-blue-800 transition-all mb-6 shadow-md"
+            >
+              <PlusCircle size={18} />
+              <span>Add Topic</span>
+            </button>
+          )}
+        </div>
+        
+        {/* Fixed central notification */}
+        {notification.visible && (
+          <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-blue-700 text-white p-4 rounded-lg shadow-xl flex items-center gap-2 z-50 transition-all">
+            <CheckCircle size={20} />
+            <span className="font-medium">{notification.message}</span>
+          </div>
+        )}
+        
+        {isAdding && (
+          <div className="mb-6 p-5 border border-gray-700 rounded-lg bg-gray-700/50 backdrop-blur-sm shadow-lg">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="font-semibold text-lg text-white">Add New Learning Topic</h2>
+              <button 
+                onClick={() => {
+                  setIsAdding(false);
+                  setNewTopic({ name: '', progress: 0 });
+                  setNameError('');
+                  setProgressError('');
+                }}
+                className="text-gray-300 hover:text-white transition-colors"
+              >
+                <X size={18} />
+              </button>
             </div>
             
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
-                Your Learning Journey
-              </span>
-            </h1>
-            
-            <p className="text-xl text-gray-300 mb-10 leading-relaxed">
-              Track your progress, earn certificates, and continue mastering new skills
-            </p>
+            <div className="flex gap-4 mb-2">
+              <input
+                type="text"
+                placeholder="Topic name"
+                value={newTopic.name}
+                onChange={(e) => setNewTopic({ ...newTopic, name: autoCapitalize(e.target.value) })}
+                className="border border-gray-600 rounded-md px-3 py-2 w-full bg-gray-700 text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all"
+              />
+              
+              <button
+                onClick={handleAddTopic}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md shadow transition-colors"
+              >
+                Add
+              </button>
+            </div>
+            <p className="text-gray-400 text-sm">Topic will be created with default modules</p>
           </div>
-        </div>
-      </header>
-
-      {/* Progress Tab Navigation */}
-      <section className="bg-gray-800/30 backdrop-blur-md sticky top-0 z-10 border-y border-gray-700/50 shadow-lg">
-        <div className="container mx-auto px-6">
-          <div className="flex items-center justify-center">
-            <div className="flex space-x-2 py-4">
-              {[
-                { id: 'all', label: 'All Courses', icon: <BookOpen size={16} className="mr-1.5" /> },
-                { id: 'inProgress', label: 'In Progress', icon: <TrendingUp size={16} className="mr-1.5" /> },
-                { id: 'completed', label: 'Completed', icon: <CheckCircle size={16} className="mr-1.5" /> }
-              ].map(tab => (
-                <button 
-                  key={tab.id}
-                  className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all flex items-center ${
-                    activeTab === tab.id 
-                      ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/20' 
-                      : 'bg-gray-800/60 text-gray-300 hover:bg-gray-700/80 border border-gray-700/50'
-                  }`}
-                  onClick={() => setActiveTab(tab.id)}
-                >
-                  {tab.icon}
-                  {tab.label}
-                </button>
-              ))}
+        )}
+        
+        <ul key={topicsKey} className="space-y-4">
+          {topics.length === 0 ? (
+            <div className="p-8 text-center text-gray-400 border border-dashed border-gray-700 rounded-lg">
+              <BookOpen size={48} className="mx-auto mb-4 opacity-50" />
+              <p>No learning topics yet. Add your first topic to start tracking!</p>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Main Content Section */}
-      <section className="py-16">
-        <div className="container mx-auto px-6">
-          {loading ? (
-            <div className="flex justify-center items-center py-20">
-              <div className="relative">
-                <div className="absolute -inset-4 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 opacity-50 blur-lg animate-pulse"></div>
-                <Loader2 size={40} className="animate-spin text-white relative" />
-              </div>
-              <span className="ml-4 text-xl">Loading your progress...</span>
-            </div>
-          ) : error ? (
-            <div className="text-center py-20">
-              <div className="bg-red-900/30 backdrop-blur-sm rounded-xl p-8 max-w-lg mx-auto border border-red-700">
-                <h3 className="text-xl font-semibold mb-3">Error Loading Progress Data</h3>
-                <p className="text-gray-300 mb-6">{error}</p>
-                <button 
-                  onClick={() => window.location.reload()}
-                  className="px-6 py-2 bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors"
-                >
-                  Retry
-                </button>
-              </div>
-            </div>
-          ) : filteredProgressData.length > 0 ? (
-            <div className="space-y-10">
-              {filteredProgressData.map((progress) => {
-                const course = getCourseDetails(progress.courseId);
-                return (
-                  <div key={progress.id} className="bg-gray-800/40 backdrop-blur-sm rounded-xl border border-gray-700/50 overflow-hidden">
-                    {/* Course Header */}
-                    <div className={`bg-gradient-to-r ${course.colorClass} p-6`}>
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <h2 className="text-2xl font-bold mb-2">{course.courseName}</h2>
-                          <p className="text-gray-200 text-sm">{course.description}</p>
-                        </div>
-                        <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-lg">
-                          <div className="text-xs text-white/70 mb-1">Progress</div>
-                          <div className="text-2xl font-bold">{progress.progressPercentage.toFixed(0)}%</div>
-                        </div>
-                      </div>
-                    </div>
+          ) : (
+            topics.map((topic) => (
+              <li key={topic.id} className="bg-gradient-to-br from-gray-700 to-gray-800 p-5 rounded-lg shadow-md border border-gray-700">
+                {editId === topic.id ? (
+                  <div className="w-full flex flex-col gap-4">
+                    <input
+                      type="text"
+                      value={topic.name}
+                      onChange={(e) => setTopics(topics.map(t => 
+                        t.id === topic.id ? { ...t, name: autoCapitalize(e.target.value) } : t
+                      ))}
+                      className="border rounded-md px-3 py-2 w-full bg-gray-600 text-white focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none"
+                    />
                     
-                    {/* Progress Bar */}
-                    <div className="px-6 py-4 border-b border-gray-700/50">
-                      <div className="w-full h-4 bg-gray-700 rounded-full overflow-hidden">
-                        <div 
-                          className={`h-full bg-gradient-to-r ${course.colorClass}`}
-                          style={{ width: `${progress.progressPercentage}%` }}
-                        ></div>
-                      </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          setEditId(null);
+                          setNameError('');
+                          setProgressError('');
+                        }}
+                        className="bg-gray-600 hover:bg-gray-500 text-white px-3 py-1 rounded-md"
+                      >
+                        <X size={16} />
+                      </button>
+                      <button
+                        onClick={() => handleUpdateTopic(topic.id)}
+                        className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-md flex items-center gap-1"
+                      >
+                        <Save size={16} />
+                        <span>Save</span>
+                      </button>
                     </div>
-                    
-                    {/* Course Info and Badges */}
-                    <div className="px-6 py-4 grid grid-cols-1 md:grid-cols-3 gap-6">
-                      {/* Course Stats */}
-                      <div className="col-span-1 space-y-4">
-                        <h3 className="text-lg font-semibold mb-3">Course Stats</h3>
-                        
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between bg-gray-700/30 p-3 rounded-lg">
-                            <div className="flex items-center">
-                              <BookOpen size={18} className="text-blue-400 mr-2" />
-                              <span>Modules</span>
-                            </div>
-                            <span className="font-medium">{progress.completedModules.length} / {progress.totalModules}</span>
-                          </div>
-                          
-                          <div className="flex items-center justify-between bg-gray-700/30 p-3 rounded-lg">
-                            <div className="flex items-center">
-                              <Award size={18} className="text-purple-400 mr-2" />
-                              <span>Badges</span>
-                            </div>
-                            <span className="font-medium">{progress.badgesEarned.length}</span>
-                          </div>
-                          
-                          <div className="flex items-center justify-between bg-gray-700/30 p-3 rounded-lg">
-                            <div className="flex items-center">
-                              <Shield size={18} className="text-green-400 mr-2" />
-                              <span>Certificate</span>
-                            </div>
-                            <span className={`font-medium ${progress.isCertificateEligible ? 'text-green-400' : 'text-gray-400'}`}>
-                              {progress.isCertificateEligible ? 'Available' : 'Not Eligible'}
-                            </span>
-                          </div>
-                        </div>
-                        
-                        {progress.isCertificateEligible && (
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex justify-between items-center">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-lg font-semibold">{topic.name}</h3>
                           <button 
-                            onClick={() => handleViewCertificate(progress.courseId)}
-                            className={`w-full mt-4 py-2 rounded-lg bg-gradient-to-r ${course.colorClass} flex items-center justify-center`}
+                            onClick={() => toggleExpand(topic.id)}
+                            className="text-gray-400 hover:text-white transition-colors"
                           >
-                            <Award size={18} className="mr-2" />
-                            View Certificate
+                            {topic.expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                           </button>
-                        )}
+                        </div>
+                        <p className="text-sm text-gray-300">Added on {formatDate(topic.createdAt)}</p>
+                        <div className="w-full bg-gray-600 rounded-full h-3 mt-3">
+                          <div 
+                            className="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full shadow-inner transition-all duration-500"
+                            style={{ width: `${topic.progress}%` }}
+                          ></div>
+                        </div>
+                        <div className="flex justify-between mt-1">
+                          <p className="text-sm text-gray-300">{topic.progress}% complete</p>
+                          <p className="text-sm text-gray-300">{topic.modules?.length || 0} modules</p>
+                        </div>
                       </div>
                       
-                      {/* Feedback Section */}
-                      <div className="col-span-2 space-y-4">
-                        {progress.feedback && (
-                          <div className="mb-6">
-                            <h3 className="text-lg font-semibold mb-3">Instructor Feedback</h3>
-                            <div className="bg-gray-700/30 p-4 rounded-lg border-l-4 border-blue-500">
-                              <p className="text-gray-300 italic">{progress.feedback}</p>
-                            </div>
-                          </div>
-                        )}
-                        
-                        {/* Badges */}
-                        <div>
-                          <h3 className="text-lg font-semibold mb-3">Badges Earned</h3>
-                          {progress.badgesEarned.length > 0 ? (
-                            <div className="flex flex-wrap gap-3">
-                              {progress.badgesEarned.map((badge, idx) => (
-                                <div key={idx} className="bg-gray-800/80 border border-gray-600 px-3 py-2 rounded-lg flex items-center">
-                                  <div className="p-1.5 bg-gradient-to-r from-amber-500 to-amber-600 rounded-full mr-2">
-                                    <Award size={14} className="text-white" />
-                                  </div>
-                                  <span className="text-sm font-medium">{badge}</span>
-                                </div>
-                              ))}
-                            </div>
-                          ) : (
-                            <div className="bg-gray-700/30 p-4 rounded-lg text-gray-400 text-sm">
-                              No badges earned yet. Complete course milestones to earn badges.
-                            </div>
+                      <div className="flex gap-2 ml-4">
+                        <button
+                          onClick={() => setEditId(topic.id)}
+                          className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-md shadow transition-colors"
+                          title="Edit"
+                        >
+                          <Pencil size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteTopic(topic.id)}
+                          className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md shadow transition-colors"
+                          title="Delete"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {/* Modules Section */}
+                    {topic.expanded && (
+                      <div className="mt-4 border-t border-gray-600 pt-3">
+                        <div className="flex justify-between items-center mb-2">
+                          <h4 className="font-medium text-gray-300">Modules</h4>
+                          
+                          {isAddingModule !== topic.id && (
+                            <button
+                              onClick={() => setIsAddingModule(topic.id)}
+                              className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-2 py-1 rounded-md flex items-center gap-1"
+                            >
+                              <PlusCircle size={14} />
+                              <span>Add Module</span>
+                            </button>
                           )}
                         </div>
                         
-                        {/* Module Progress */}
-                        <div className="mt-6">
-                          <h3 className="text-lg font-semibold mb-3">Module Progress</h3>
-                          <div className="space-y-2">
-                            {/* Generating mock modules for demo */}
-                            {Array.from({ length: progress.totalModules }, (_, idx) => {
-                              const moduleId = `mod${idx + 1}`;
-                              const isCompleted = progress.completedModules.includes(moduleId);
-                              
-                              return (
-                                <div 
-                                  key={moduleId}
-                                  className={`p-3 rounded-lg flex items-center justify-between 
-                                  ${isCompleted ? 'bg-green-900/20 border border-green-700/50' : 'bg-gray-700/30 border border-gray-600/50'}`}
-                                >
-                                  <div className="flex items-center">
-                                    {isCompleted ? (
-                                      <CheckCircle size={18} className="text-green-400 mr-2" />
-                                    ) : (
-                                      <Clock size={18} className="text-gray-400 mr-2" />
-                                    )}
-                                    <span>Module {idx + 1}: {isCompleted ? 'Completed' : 'Pending'}</span>
-                                  </div>
-                                  
-                                  <button 
-                                    onClick={() => handleModuleCompletion(progress.id, moduleId, !isCompleted)}
-                                    className={`text-xs px-3 py-1 rounded-full 
-                                    ${isCompleted ? 
-                                      'bg-gray-700 hover:bg-gray-600 text-gray-300' : 
-                                      'bg-green-700 hover:bg-green-600 text-white'}`}
-                                  >
-                                    {isCompleted ? 'Mark Incomplete' : 'Mark Complete'}
-                                  </button>
-                                </div>
-                              );
-                            })}
+                        {isAddingModule === topic.id && (
+                          <div className="bg-gray-700/70 p-3 rounded-md mb-3 flex gap-2">
+                            <input
+                              type="text"
+                              placeholder="Module name"
+                              value={newModule.name}
+                              onChange={(e) => setNewModule({...newModule, name: autoCapitalize(e.target.value)})}
+                              className="border rounded-md px-3 py-1 bg-gray-600 text-white text-sm flex-1"
+                            />
+                            <input
+                              type="number"
+                              min="0"
+                              max="100"
+                              placeholder="Progress"
+                              value={newModule.progress}
+                              onChange={(e) => setNewModule({...newModule, progress: e.target.value})}
+                              className="border rounded-md px-3 py-1 bg-gray-600 text-white text-sm w-20"
+                            />
+                            <div className="flex gap-1">
+                              <button
+                                onClick={() => setIsAddingModule(null)}
+                                className="bg-gray-500 hover:bg-gray-400 text-white px-2 py-1 rounded-md"
+                              >
+                                <X size={14} />
+                              </button>
+                              <button
+                                onClick={() => handleAddModule(topic.id)}
+                                className="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded-md"
+                              >
+                                <Save size={14} />
+                              </button>
+                            </div>
                           </div>
+                        )}
+                        
+                        <div className="space-y-1 mt-2">
+                          {topic.modules?.length > 0 ? (
+                            topic.modules.map(module => (
+                              <TopicModule
+                                key={module.id}
+                                module={module}
+                                onModuleUpdate={(updatedModule) => handleModuleUpdate(topic.id, updatedModule)}
+                                onModuleDelete={(moduleId) => handleModuleDelete(topic.id, moduleId)}
+                              />
+                            ))
+                          ) : (
+                            <p className="text-gray-400 text-sm py-2">No modules yet.</p>
+                          )}
                         </div>
                       </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="text-center py-20">
-              <div className="bg-gray-800/60 backdrop-blur-sm rounded-xl p-8 max-w-lg mx-auto border border-gray-700">
-                <AlertCircle size={48} className="mx-auto mb-4 text-gray-400" />
-                <h3 className="text-xl font-semibold mb-3">No courses found</h3>
-                <p className="text-gray-400 mb-6">
-                  {activeTab === 'completed' 
-                    ? "You haven't completed any courses yet." 
-                    : activeTab === 'inProgress'
-                    ? "You don't have any courses in progress."
-                    : "You aren't enrolled in any courses yet."}
-                </p>
-                <button 
-                  onClick={() => navigate('/courses')}
-                  className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-colors"
-                >
-                  Browse Courses
-                </button>
-              </div>
-            </div>
+                    )}
+                  </>
+                )}
+              </li>
+            ))
           )}
+        </ul>
+        
+        <div className="mt-6 flex justify-between text-sm text-gray-400 p-2 border-t border-gray-700 pt-4">
+          <div className="flex items-center gap-1">
+            <RefreshCw size={14} className="animate-spin-slow" />
+            <span>Progress auto-calculated from modules</span>
+          </div>
+          <div>Total topics: {topics.length}</div>
         </div>
-      </section>
+      </div>
     </div>
   );
 }
